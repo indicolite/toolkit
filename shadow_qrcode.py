@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding=utf-8
+
 import sys
 import urllib2
 import time
@@ -23,12 +26,10 @@ alter table scanner add column code text;
 alter table scanner alter column addr type text;
 alter table scanner alter column pasd type text;
 alter table scanner alter column aesd type text;
-
 """
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-
 
 def job_function():
 
@@ -41,7 +42,7 @@ def job_function():
     for x in lst:
         strl = "".join(x)
         data.append(strl)
-    print data
+    #print data
 
     try:
         connection = psycopg2.connect(dbname='postgres', user='postgres', host='localhost')
@@ -73,7 +74,6 @@ def job_function():
     driver.quit()
 
 sched = BlockingScheduler()
-# Schedule job_function to be called every two hours
-#sched.add_job(job_function, 'interval', hours=2)
+# Schedule job_function to be called every six hours
 sched.add_job(job_function, 'interval', hours=6, start_date='2017-05-03 15:33:40', end_date='2020-05-02 15:33:40')
 sched.start()
