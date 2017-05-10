@@ -9,9 +9,29 @@ mysql数据调用封装
     @支持文件句柄便捷调用
     @自动重连,超时时间的优化设定。
 
-
-
-
+CREATE TABLE `login_action` (
+  `q_date` date DEFAULT NULL,
+  `q_time` timestamp NULL DEFAULT NULL,
+  `q_ip` char(50) DEFAULT '',
+  `q_uid` char(20) DEFAULT '',
+  `q_login_type` char(20) DEFAULT '',
+  `q_dev_type` char(10) DEFAULT '',
+  `q_channel` char(20) DEFAULT '',
+  `q_dev_imei` char(50) DEFAULT '',
+  `q_dev_model` char(50) DEFAULT '',
+  `q_net` char(10) DEFAULT '',
+  `q_app_ver` char(10) DEFAULT '',
+  `q_sys_version` char(50) DEFAULT '',
+  `q_mobile` char(20) DEFAULT '',
+  `q_third_type` char(10) DEFAULT '',
+  `q_third_id` char(100) DEFAULT '',
+  `q_login_uid` char(10) DEFAULT '',
+  `q_result_code` char(10) DEFAULT '',
+  `q_opt_duration` bigint(20) DEFAULT '0',
+  KEY `q_time` (`q_time`),
+  KEY `q_date` (`q_date`),
+  KEY `q_login_id` (`q_login_uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
 '''
 
@@ -238,7 +258,7 @@ class Connection(object):
 
     def _execute(self, cursor, query, parameters):
         try:
-            
+
             return cursor.execute(query, parameters)
         except MySQLdb.OperationalError:
             logging.error("Error connecting to MySQL on %s", self.host)
@@ -284,7 +304,7 @@ class Insert(object):
         _fields=",".join(["".join(['`',column,'`']) for column in columns])
         _values=",".join(["%s" for i in range(len(columns))])
         _sql="".join([_prefix,"(",_fields,") VALUES (",_values,")"])
-        _params=[fileds[key] for key in columns] 
+        _params=[fileds[key] for key in columns]
         return self.database.execute(_sql,*tuple(_params))
 
 class Update(object):
@@ -320,7 +340,7 @@ class Delete(object):
     '''
     批量删除调用类
     '''
-    
+
     def __init__(self, database, tblname, where):
         self.database = database
         self._tblname = tblname
