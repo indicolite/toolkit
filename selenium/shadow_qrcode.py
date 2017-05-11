@@ -68,6 +68,7 @@ def job_function():
         connection.commit()
     else:
         print "too many connects with %s" % trie
+        driver.quit()
         sys.exit(1)
 
     time.sleep(2)
