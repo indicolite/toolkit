@@ -12,6 +12,7 @@ import base64
 import qrcode
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
+import logging
 
 """
 postgres=# create table scanner(id serial primary key,
@@ -74,6 +75,7 @@ def job_function():
     time.sleep(2)
     driver.quit()
 
+logging.basicConfig()
 sched = BlockingScheduler()
 # Schedule job_function to be called every six hours
 sched.add_job(job_function, 'interval', hours=6, start_date='2017-05-03 15:33:40', end_date='2020-05-02 15:33:40')
