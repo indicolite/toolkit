@@ -55,7 +55,9 @@ output:
     index: "filebeat"
 ```
 4. restart filebeat
+```
 systemctl enable filebeat
 systemctl restart filebeat
 systemctl status filebeat -l
+```
 5. visit http://**master**:5601/, create new index: filebeat-*, and see results
