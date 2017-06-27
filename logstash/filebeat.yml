@@ -1,0 +1,23 @@
+filebeat:
+  prospectors:
+    -
+      paths:
+        - /var/log/messages
+      input_type: log
+      document_type: syslog
+    -
+      paths:
+        - /opt/logs/tomcatlog/catalina.*.log
+      input_type: log
+      document_type: tomcatlog
+    -
+      paths:
+        - /var/lib/docker/containers/*/*.json
+      input_type: log
+      document_type: containerlog
+  registry_file: /var/lib/filebeat/registry
+
+output:
+  elasticsearch:
+    hosts: ["10.127.3.6:9200"]
+    index: "filebeat"
