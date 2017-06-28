@@ -1,8 +1,7 @@
 #!/bin/bash
-
 if [ $# -lt 2 ]; then
     echo "Usage: $0 master-ip node-ip"
-    exit
+    exit 0
 fi
 
 echo $1" "" in master node to install elasticsearch and kibana: "
@@ -19,8 +18,7 @@ echo $1" "" in master node to install elasticsearch and kibana: "
 
     wget https://download.elastic.co/kibana/kibana/kibana-4.5.4-1.x86_64.rpm
     yum localinstall kibana-4.5.4-1.x86_64.rpm
-    wget https://download.elastic.co/kibana/kibana/kibana-4.5.4-1.x86_64.rpm
-    yum localinstall kibana-4.5.4-1.x86_64.rpm
+    wget https://download.elastic.co/beats/filebeat/filebeat-1.2.3-x86_64.rpm
 
     #vim /opt/kibana/config/kibana.yml
     #elasticsearch.url: "http://10.10.20.203:9200"
@@ -38,8 +36,9 @@ echo $1" "" done."
 REST=$@
 for args in ${REST:2}
 do
-    wget https://download.elastic.co/beats/filebeat/filebeat-1.2.3-x86_64.rpm
-    yum localinstall filebeat-1.2.3-x86_64.rpm
+    gzip -c filebeat-1.2.3-x86_64.rpm |ssh root@${args} "gunzip -c - > /tmp/filebeat-1.2.3-x86_64.rpm"
+    #wget https://download.elastic.co/beats/filebeat/filebeat-1.2.3-x86_64.rpm
+    ssh root@${args} "cd /tmp && yum localinstall filebeat-1.2.3-x86_64.rpm"
     #vim /etc/filebeat/filebeat.yml
 
 cat > /etc/filebeat/filebeat.yml <<EOF
@@ -63,7 +62,8 @@ output:
     index: "filebeat"
 EOF
     sed -i "s/0.0.0.0/${args}/" /etc/filebeat/filebeat.yml
-    systemctl enable filebeat
-    systemctl restart filebeat
-    systemctl status filebeat -l
+    gzip -c /etc/filebeat/filebeat.yml |ssh root@${args} "gunzip -c - > /etc/filebeat/filebeat.yml"
+    ssh root@${args} "systemctl enable filebeat"
+    ssh root@${args} systemctl restart filebeat
+    ssh root@${args} systemctl status filebeat -l
 done
