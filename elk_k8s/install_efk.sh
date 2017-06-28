@@ -5,6 +5,7 @@ if [ $# -lt 2 ]; then
     exit 0
 fi
 
+echo "make sure you have java installed!!!"
 echo $1" "" in master node to install elasticsearch and kibana: "
     wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.3.5/elasticsearch-2.3.5.rpm
     yum localinstall elasticsearch-2.3.5.rpm
