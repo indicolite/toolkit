@@ -28,7 +28,7 @@ echo $1" "" in master node to install elasticsearch and kibana: "
     ELK3="http://"
     ELK4=":9200\""
     sed -i '/elasticsearch.url/d' /opt/kibana/config/kibana.yml
-    echo ${ELK2}${ELK3}${args}${ELK4} >> /opt/kibana/config/kibana.yml
+    echo ${ELK2}${ELK3}${1}${ELK4} >> /opt/kibana/config/kibana.yml
     systemctl enable kibana.service
     systemctl restart kibana.service
     systemctl status kibana.service -l
