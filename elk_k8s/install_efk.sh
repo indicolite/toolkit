@@ -10,7 +10,7 @@ echo $1" "" in master node to install elasticsearch and kibana: "
     wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.3.5/elasticsearch-2.3.5.rpm
     yum localinstall elasticsearch-2.3.5.rpm
     #vim /etc/elasticsearch/elasticsearch.yml
-    ELK1="network.host "
+    ELK1="network.host: "
     sed -i '/network.host/d' /etc/elasticsearch/elasticsearch.yml
     echo ${ELK1}${1} >> /etc/elasticsearch/elasticsearch.yml
 
