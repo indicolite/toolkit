@@ -1,0 +1,19 @@
+---
+
+- name: Install MariaDB package
+  yum: name={{ item }} state=installed
+  with_items:
+    - mariadb-server
+    - mysql
+    - MySQL-python
+
+- name: Copy Centos6&&Crntos7 EPEL
+  copy: src={{ item }} dest=/etc/init.d
+  with_items:
+   - mysql
+
+- name: Start mariadb
+  service: 
+    name: "mysql"
+    state: "started"
+    enabled: yes

@@ -1,0 +1,58 @@
+---
+
+- name: Create mysql configure file
+  copy: src={{ item }} dest=/etc/my3307.cnf
+  with_items:
+   - my3307.cnf
+
+- name: Initialize mysql3307 datadir
+  shell: /usr/bin/mysql_install_db --defaults-file=/etc/my3307.cnf
+
+- name: Create MariaDB server
+  shell: /usr/libexec/mysqld --defaults-file=/etc/my3307.cnf --user=mysql &
+#  service:
+#    name: "mysql"
+#    state: "started"
+#    enabled: yes
+
+#- name: Change root login_password
+# #shell: /usr/bin/mysqladmin -uroot  password "Abc12345"
+
+- wait_for:
+    path: /var/lib/mysql3307/mysql.sock
+    state: present
+
+- name: Get Mysql-master Status
+  mysql_replication: 
+    mode: getmaster
+    login_host: "{{ master_host }}"
+    login_user: "{{ dbuser }}"
+    login_password: "{{ dbuserpass }}"
+    login_port: 3307
+  #delegate_to: "{{ groups['mysql-master'][0] }}"
+  register: master
+
+- name: Configure replication on the slave.
+  mysql_replication:
+    mode: changemaster
+    login_user: root
+    #login_password: "{{ dbuserpass }}"
+    #login_port: 3307
+    login_unix_socket: /var/lib/mysql3307/mysql.sock
+    master_host: "{{ master_host }}"
+    master_port: 3307
+    master_user: "{{ dbuser }}"
+    master_password: "{{ dbuserpass }}"
+    master_log_file: "{{ master.File }}"
+    master_log_pos: "{{ master.Position }}"
+  #mysql_replication: mode=changemaster master_host={{ groups['mysql-master'][0] }} master_log_file={{ replication.File }} master_log_pos={{ replication.Position }} master_user={{ mysql_users.slave.user }} master_password={{ mysql_users.slave.password }}
+
+
+- name: Start slave
+  mysql_replication:
+    mode: startslave
+    login_host: "{{ slave_host }}"
+    login_user: root
+    #login_password: "{{ dbuserpass }}"
+    login_port: 3307
+    login_unix_socket: /var/lib/mysql3307/mysql.sock

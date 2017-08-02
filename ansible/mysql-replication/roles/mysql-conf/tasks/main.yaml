@@ -1,0 +1,9 @@
+---
+#- name: Create Mysql-Proxy User
+#  mysql_user: name={{ mysqluser }} password={{ mysqlpass }} priv=*.*:ALL,GRANT host={{ item }} state=present
+#  with_items:
+#    - '%'
+#    - 'localhost' 
+
+- name: Change master&slave mysql root password
+  shell: /usr/bin/mysqladmin -uroot  password "{{ root_pass }}" -S /var/lib/mysql3307/mysql.sock

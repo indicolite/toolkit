@@ -1,0 +1,57 @@
+---
+
+- name: Create mysql configure file
+  copy: src={{ item }} dest=/etc/my3307.cnf
+  with_items:
+   - my3307.cnf
+
+- name: Initialize mysql3307 datadir
+  shell: /usr/bin/mysql_install_db --defaults-file=/etc/my3307.cnf
+
+- name: Start MariaDB server
+  shell: /usr/libexec/mysqld --defaults-file=/etc/my3307.cnf --user=mysql &
+#  service:
+#    name: "mysql"
+#    state: "started"
+#    enabled: yes
+
+#- stat:
+#    path: /var/lib/mysql3307/mysql.sock
+#  register: foo
+#
+- wait_for:
+    path: /var/lib/mysql3307/mysql.sock
+    state: present
+
+- name: Change root login_password
+  shell: /usr/bin/mysqladmin -uroot -S /var/lib/mysql3307/mysql.sock password "Abc12345"
+
+- name: Create Replication User
+  mysql_user: 
+    login_user: root
+    login_password: Abc12345
+    login_port: 3307
+    login_unix_socket: /var/lib/mysql3307/mysql.sock
+    name: "{{ dbuser }}" 
+    password: "{{ dbuserpass }}" 
+    priv: "*.*:ALL,GRANT" 
+    host: "{{ slave_host }}" 
+    #state=present
+  #with_items:
+  #  - '%'
+  #  - 'localhost'
+
+- name: Grant root on *.*
+  mysql_user: 
+    login_user: root
+    login_password: Abc12345
+    login_port: 3307
+    login_unix_socket: /var/lib/mysql3307/mysql.sock
+    name: root
+    password: Abc12345
+    priv: "*.*:ALL,GRANT" 
+    host: "{{ item }}" 
+    #state=present
+  with_items:
+    - '%'
+    - 'localhost'
