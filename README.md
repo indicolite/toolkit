@@ -6,5 +6,7 @@ This code used to handle a big single file and load the filtered data into datab
 This code simulates selenium to crawl dynamic data, and then into database, also saves to QRcode, periodically.
 - **selenium/crawing_blog.py**
 This code simulates selenium to crawl blog data in xiami.group and save data into local postgresql database.
-- **elk_k8s/***
-This code used to create pods and service to kubernetes logging system, say, elk logging.
+- **filebeat/***
+This code used to create pods and service to kubernetes logging system, say, efk logging-data.
+- **ansible/***
+This code used to generate ansible example codes.
