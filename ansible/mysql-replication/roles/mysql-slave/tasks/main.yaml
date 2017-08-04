@@ -26,8 +26,8 @@
   mysql_replication: 
     mode: getmaster
     login_host: "{{ master_host }}"
-    login_user: "{{ dbuser }}"
-    login_password: "{{ dbuserpass }}"
+    login_user: root
+    login_password: Abc12345
     login_port: 3307
   #delegate_to: "{{ groups['mysql-master'][0] }}"
   register: master
@@ -41,8 +41,10 @@
     login_unix_socket: /var/lib/mysql3307/mysql.sock
     master_host: "{{ master_host }}"
     master_port: 3307
-    master_user: "{{ dbuser }}"
-    master_password: "{{ dbuserpass }}"
+    #master_user: "{{ dbuser }}"
+    #master_password: "{{ dbuserpass }}"
+    master_user: root
+    master_password: Abc12345
     master_log_file: "{{ master.File }}"
     master_log_pos: "{{ master.Position }}"
   #mysql_replication: mode=changemaster master_host={{ groups['mysql-master'][0] }} master_log_file={{ replication.File }} master_log_pos={{ replication.Position }} master_user={{ mysql_users.slave.user }} master_password={{ mysql_users.slave.password }}

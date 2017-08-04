@@ -34,7 +34,8 @@
     login_unix_socket: /var/lib/mysql3307/mysql.sock
     name: "{{ dbuser }}" 
     password: "{{ dbuserpass }}" 
-    priv: "*.*:ALL,GRANT" 
+    priv: "*.*:REPLICATION SLAVE,REPLICATION CLIENT" 
+    #priv: "*.*:ALL,GRANT" 
     host: "{{ slave_host }}" 
     #state=present
   #with_items:
