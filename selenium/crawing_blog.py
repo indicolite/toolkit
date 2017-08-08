@@ -15,6 +15,13 @@ create table blog_link(id serial primary key,
 title text,
 url text,
 time timestamp with time zone default (now() at time zone 'CCT'));
+
+create table xuelianzoo(id serial primary key,
+title text,
+content text,
+tag text,
+at text,
+time timestamp with time zone default (now() at time zone 'CCT'));
 """
 
 reload(sys)
