@@ -16,7 +16,7 @@ title text,
 url text,
 time timestamp with time zone default (now() at time zone 'CCT'));
 
-create table xuelianzoo(id serial primary key,
+create table xue*zoo(id serial primary key,
 title text,
 content text,
 tag text,
