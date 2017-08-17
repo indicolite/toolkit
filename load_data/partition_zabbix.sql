@@ -3,13 +3,13 @@
 SET GLOBAL event_scheduler = ON;
 
 ####drop bak table
-DROP TABLE history_uint_bak;
-DROP TABLE history_bak;
-DROP TABLE history_str_bak;
-DROP TABLE history_text_bak;
-DROP TABLE history_log_bak;
-DROP TABLE trends_bak;
-DROP TABLE trends_uint_bak;
+DROP TABLE IF EXISTS history_uint_bak;
+DROP TABLE IF EXISTS history_bak;
+DROP TABLE IF EXISTS history_str_bak;
+DROP TABLE IF EXISTS history_text_bak;
+DROP TABLE IF EXISTS history_log_bak;
+DROP TABLE IF EXISTS trends_bak;
+DROP TABLE IF EXISTS trends_uint_bak;
 
 ####create table
 CREATE TABLE `history_uint_bak` (
