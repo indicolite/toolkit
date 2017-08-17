@@ -1,3 +1,4 @@
+#ensure first that event_scheduler is on
 SET GLOBAL event_scheduler = ON;
 ####drop bak table
 DROP TABLE history_uint_bak;
@@ -159,21 +160,37 @@ BEGIN
     DECLARE TABLENAME_TMP VARCHAR(64);
     DECLARE PERIOD_TMP VARCHAR(12);
     DECLARE DONE INT DEFAULT 0;
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     DECLARE get_prt_tables CURSOR FOR
         SELECT `tablename`, `period`
             FROM manage_partitions;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+<<<<<<< HEAD
 
     OPEN get_prt_tables;
 
+=======
+
+    OPEN get_prt_tables;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     loop_create_part: LOOP
         IF DONE THEN
             LEAVE loop_create_part;
         END IF;
+<<<<<<< HEAD
 
         FETCH get_prt_tables INTO TABLENAME_TMP, PERIOD_TMP;
 
+=======
+
+        FETCH get_prt_tables INTO TABLENAME_TMP, PERIOD_TMP;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
         CASE WHEN PERIOD_TMP = 'day' THEN
                     CALL `create_partition_by_day`(IN_SCHEMANAME, TABLENAME_TMP);
              WHEN PERIOD_TMP = 'month' THEN
@@ -183,10 +200,17 @@ BEGIN
                             ITERATE loop_create_part;
             END;
         END CASE;
+<<<<<<< HEAD
 
                 UPDATE manage_partitions set last_updated = NOW() WHERE tablename = TABLENAME_TMP;
     END LOOP loop_create_part;
 
+=======
+
+                UPDATE manage_partitions set last_updated = NOW() WHERE tablename = TABLENAME_TMP;
+    END LOOP loop_create_part;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     CLOSE get_prt_tables;
 END$$
 DELIMITER ;
@@ -202,6 +226,7 @@ BEGIN
         DECLARE PARTITIONNAME VARCHAR(16);
         SET BEGINTIME = DATE(NOW()) + INTERVAL 1 DAY;
         SET PARTITIONNAME = DATE_FORMAT( BEGINTIME, 'p%Y_%m_%d' );
+<<<<<<< HEAD
 
         SET ENDTIME = UNIX_TIMESTAMP(BEGINTIME + INTERVAL 1 DAY);
 
@@ -209,6 +234,15 @@ BEGIN
                 FROM information_schema.partitions
                 WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = PARTITIONNAME;
 
+=======
+
+        SET ENDTIME = UNIX_TIMESTAMP(BEGINTIME + INTERVAL 1 DAY);
+
+        SELECT COUNT(*) INTO ROWS_CNT
+                FROM information_schema.partitions
+                WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = PARTITIONNAME;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     IF ROWS_CNT = 0 THEN
                      SET @SQL = CONCAT( 'ALTER TABLE `', IN_SCHEMANAME, '`.`', IN_TABLENAME, '`',
                                 ' ADD PARTITION (PARTITION ', PARTITIONNAME, ' VALUES LESS THAN (', ENDTIME, '));' );
@@ -232,6 +266,7 @@ BEGIN
         DECLARE PARTITIONNAME VARCHAR(16);
         SET BEGINTIME = DATE(NOW() - INTERVAL DAY(NOW()) DAY + INTERVAL 1 DAY + INTERVAL 1 MONTH);
         SET PARTITIONNAME = DATE_FORMAT( BEGINTIME, 'p%Y_%m' );
+<<<<<<< HEAD
 
         SET ENDTIME = UNIX_TIMESTAMP(BEGINTIME + INTERVAL 1 MONTH);
 
@@ -239,6 +274,15 @@ BEGIN
                 FROM information_schema.partitions
                 WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = PARTITIONNAME;
 
+=======
+
+        SET ENDTIME = UNIX_TIMESTAMP(BEGINTIME + INTERVAL 1 MONTH);
+
+        SELECT COUNT(*) INTO ROWS_CNT
+                FROM information_schema.partitions
+                WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = PARTITIONNAME;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     IF ROWS_CNT = 0 THEN
                      SET @SQL = CONCAT( 'ALTER TABLE `', IN_SCHEMANAME, '`.`', IN_TABLENAME, '`',
                                 ' ADD PARTITION (PARTITION ', PARTITIONNAME, ' VALUES LESS THAN (', ENDTIME, '));' );
@@ -269,16 +313,28 @@ BEGIN
             JOIN manage_partitions mp ON mp.tablename = p.table_name
             WHERE p.table_schema = IN_SCHEMANAME
             ORDER BY p.table_name, p.subpartition_ordinal_position;
+<<<<<<< HEAD
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
 
     OPEN get_partitions;
 
+=======
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN get_partitions;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     loop_check_prt: LOOP
         IF DONE THEN
             LEAVE loop_check_prt;
         END IF;
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
         FETCH get_partitions INTO TABLENAME_TMP, PARTITIONNAME_TMP, VALUES_LESS_TMP, PERIOD_TMP, KEEP_HISTORY_TMP;
         CASE WHEN PERIOD_TMP = 'day' THEN
                 SET KEEP_HISTORY_BEFORE = UNIX_TIMESTAMP(DATE(NOW() - INTERVAL KEEP_HISTORY_TMP DAY));
@@ -289,12 +345,20 @@ BEGIN
                 ITERATE loop_check_prt;
             END;
         END CASE;
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
         IF KEEP_HISTORY_BEFORE >= VALUES_LESS_TMP THEN
                 CALL drop_old_partition(IN_SCHEMANAME, TABLENAME_TMP, PARTITIONNAME_TMP);
         END IF;
         END LOOP loop_check_prt;
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
         CLOSE get_partitions;
 END$$
 DELIMITER ;
@@ -305,11 +369,19 @@ DROP PROCEDURE IF EXISTS `drop_old_partition`$$
 CREATE PROCEDURE `drop_old_partition`(IN_SCHEMANAME VARCHAR(64), IN_TABLENAME VARCHAR(64), IN_PARTITIONNAME VARCHAR(64))
 BEGIN
     DECLARE ROWS_CNT INT UNSIGNED;
+<<<<<<< HEAD
 
         SELECT COUNT(*) INTO ROWS_CNT
                 FROM information_schema.partitions
                 WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = IN_PARTITIONNAME;
 
+=======
+
+        SELECT COUNT(*) INTO ROWS_CNT
+                FROM information_schema.partitions
+                WHERE table_schema = IN_SCHEMANAME AND table_name = IN_TABLENAME AND partition_name = IN_PARTITIONNAME;
+
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
     IF ROWS_CNT = 1 THEN
                      SET @SQL = CONCAT( 'ALTER TABLE `', IN_SCHEMANAME, '`.`', IN_TABLENAME, '`',
                                 ' DROP PARTITION ', IN_PARTITIONNAME, ';' );
@@ -334,4 +406,8 @@ CREATE EVENT IF NOT EXISTS `e_part_manage`
             CALL zabbix.drop_partitions('zabbix');
             CALL zabbix.create_next_partitions('zabbix');
        END$$
+<<<<<<< HEAD
 DELIMITER ;
+=======
+DELIMITER ;
+>>>>>>> a23c1c0eb28e9b0303c7b1799f4fb0465fcb7ad0
