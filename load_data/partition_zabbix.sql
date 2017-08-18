@@ -109,6 +109,7 @@ CREATE TABLE `trends_bak` (
 
 
 ####dump data
+BEGIN;
 INSERT INTO history_uint_bak SELECT * FROM history_uint;
 INSERT INTO history_bak SELECT * FROM history;
 INSERT INTO history_str_bak SELECT * FROM history_str;
@@ -116,6 +117,7 @@ INSERT INTO history_text_bak SELECT * FROM history_text;
 INSERT INTO history_log_bak SELECT * FROM history_log;
 INSERT INTO trends_bak SELECT * FROM trends;
 INSERT INTO trends_uint_bak SELECT * FROM trends_uint;
+COMMIT;
 
 ####drop old table
 DROP TABLE trends;
