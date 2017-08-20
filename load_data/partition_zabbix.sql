@@ -331,7 +331,7 @@ DELIMITER $$
 USE `zabbix`$$
 CREATE EVENT IF NOT EXISTS `e_part_manage`
        ON SCHEDULE EVERY 1 DAY
-       STARTS '2011-08-08 04:00:00'
+       STARTS '2017-08-17 00:00:00'
        ON COMPLETION PRESERVE
        ENABLE
        COMMENT 'Creating and dropping partitions'
