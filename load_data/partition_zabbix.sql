@@ -1,7 +1,8 @@
 ####Tested in zabbix3.0.x with mariadb10.1.12
 ###set event_scheduler on
-###In prevent of database abnormally restart, please **make sure to add "event_scheduler = ON" to configure file my.cnf**.
 SET GLOBAL event_scheduler = ON;
+###In prevent of database abnormally restart, please make sure to add "event_scheduler = ON" to mysql configure file my.cnf.
+SELECT @@event_scheduler;
 
 ####drop bak table
 DROP TABLE IF EXISTS history_uint_bak;
