@@ -111,7 +111,6 @@ CREATE TABLE `trends_bak` (
 
 
 ####dump data
-BEGIN;
 INSERT INTO history_uint_bak SELECT * FROM history_uint;
 INSERT INTO history_bak SELECT * FROM history;
 INSERT INTO history_str_bak SELECT * FROM history_str;
@@ -119,7 +118,6 @@ INSERT INTO history_text_bak SELECT * FROM history_text;
 INSERT INTO history_log_bak SELECT * FROM history_log;
 INSERT INTO trends_bak SELECT * FROM trends;
 INSERT INTO trends_uint_bak SELECT * FROM trends_uint;
-COMMIT;
 
 ####drop old table
 DROP TABLE trends;
@@ -131,7 +129,6 @@ DROP TABLE history_text;
 DROP TABLE history_log;
 
 ####rename new table
-BEGIN;
 ALTER TABLE trends_bak RENAME trends;
 ALTER TABLE trends_uint_bak RENAME trends_uint;
 ALTER TABLE history_uint_bak RENAME history_uint;
@@ -139,7 +136,6 @@ ALTER TABLE history_bak RENAME history;
 ALTER TABLE history_str_bak RENAME history_str;
 ALTER TABLE history_text_bak RENAME history_text;
 ALTER TABLE history_log_bak RENAME history_log;
-COMMIT;
 
 CREATE TABLE `manage_partitions` (
   `tablename` VARCHAR(64) NOT NULL COMMENT 'Table name',
