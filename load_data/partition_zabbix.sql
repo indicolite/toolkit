@@ -1,15 +1,17 @@
 ####Tested in zabbix3.0.x with mariadb10.1.12
 ###set event_scheduler on
 SET GLOBAL event_scheduler = ON;
+###In prevent of database abnormally restart, please make sure to add "event_scheduler = ON" to mysql configure file my.cnf.
+SELECT @@event_scheduler;
 
 ####drop bak table
-DROP TABLE history_uint_bak;
-DROP TABLE history_bak;
-DROP TABLE history_str_bak;
-DROP TABLE history_text_bak;
-DROP TABLE history_log_bak;
-DROP TABLE trends_bak;
-DROP TABLE trends_uint_bak;
+DROP TABLE IF EXISTS history_uint_bak;
+DROP TABLE IF EXISTS history_bak;
+DROP TABLE IF EXISTS history_str_bak;
+DROP TABLE IF EXISTS history_text_bak;
+DROP TABLE IF EXISTS history_log_bak;
+DROP TABLE IF EXISTS trends_bak;
+DROP TABLE IF EXISTS trends_uint_bak;
 
 ####create table
 CREATE TABLE `history_uint_bak` (
@@ -127,7 +129,6 @@ DROP TABLE history_text;
 DROP TABLE history_log;
 
 ####rename new table
-BEGIN;
 ALTER TABLE trends_bak RENAME trends;
 ALTER TABLE trends_uint_bak RENAME trends_uint;
 ALTER TABLE history_uint_bak RENAME history_uint;
@@ -135,7 +136,6 @@ ALTER TABLE history_bak RENAME history;
 ALTER TABLE history_str_bak RENAME history_str;
 ALTER TABLE history_text_bak RENAME history_text;
 ALTER TABLE history_log_bak RENAME history_log;
-COMMIT;
 
 CREATE TABLE `manage_partitions` (
   `tablename` VARCHAR(64) NOT NULL COMMENT 'Table name',
@@ -329,7 +329,7 @@ DELIMITER $$
 USE `zabbix`$$
 CREATE EVENT IF NOT EXISTS `e_part_manage`
        ON SCHEDULE EVERY 1 DAY
-       STARTS '2011-08-08 04:00:00'
+       STARTS '2017-08-17 00:00:00'
        ON COMPLETION PRESERVE
        ENABLE
        COMMENT 'Creating and dropping partitions'
