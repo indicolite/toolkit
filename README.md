@@ -11,6 +11,8 @@ This code is from teddysun.com, which used to function auto-deploy shadowsocks i
 This code simulates selenium to crawl dynamic data, and then into database, also saves to QRcode, periodically.
 - **selenium/crawing_blog.py**
 This code simulates selenium to crawl blog data in xiami.group and save data into local postgresql database.
+- **selenium/tcpdump_mysql.sh**
+This code uses tcpdump to catch sql info.
 - **filebeat/***
 This code used to create pods and service to kubernetes logging system, say, efk logging-data.
 - **ansible/***
