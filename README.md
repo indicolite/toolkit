@@ -18,4 +18,4 @@ This code used to create pods and service to kubernetes logging system, say, efk
 - **ansible/***
 This code used to generate ansible example codes.
 - **centos7/***
-This code refers to some automation about centos7.
+This code refers to something automation about centos7.
