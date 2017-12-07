@@ -17,3 +17,5 @@ This code uses tcpdump to catch sql info.
 This code used to create pods and service to kubernetes logging system, say, efk logging-data.
 - **ansible/***
 This code used to generate ansible example codes.
+- **centos7/***
+This code refers to some automation with centos7.
