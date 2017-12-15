@@ -48,6 +48,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+tee /etc/docker/daemon.json <<-'EOF'
+{
+  "storage-driver": "devicemapper"
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+
 rm -f /etc/yum.repo.d/*
 mv -f /etc/yum_backup/* /etc/yum.repos.d/
 rm -rf /etc/yum_backup
