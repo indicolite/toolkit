@@ -56,9 +56,14 @@ fi
 
 function disk_process(){
     cmd="virsh qemu-monitor-command ${num} '{ \"execute\": \"block_set_io_throttle\",\"arguments\": {\"device\": \"${device}\",\"iops\": ${iops},\"iops_rd\": ${iops_rd},\"iops_wr\": ${iops_wr},\"bps\": ${bps},\"bps_rd\": ${bps_rd},\"bps_wr\": ${bps_wr}}}'"
-    eval ${cmd}
-    echo ${cmd}
+    #eval ${cmd}
+    #echo ${cmd}
+    eval ${cmd} > /tmp/disk-qos.err 2>&1
+    if grep --quiet error /tmp/disk-qos.err ; then
+        echo 1
+    else
+        echo 0
+    fi
 }
 
 disk_process
-echo "End"
