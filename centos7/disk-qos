@@ -1,0 +1,64 @@
+#!/bin/bash
+#set -x
+#virsh # qemu-monitor-command 5 { \"execute\": \"block_set_io_throttle\",\"arguments\": {\"device\": \"drive-virtio-disk0\",\"iops\": 100,\"iops_rd\": 0,\"iops_wr\": 0,\"bps\": 0,\"bps_rd\": 0,\"bps_wr\": 0}}
+#virsh # qemu-monitor-command 5 --hmp info block
+#drive-virtio-disk0: removable=0 io-status=ok file=/home/image/916.img ro=0 drv=raw encrypted=0 bps=0 bps_rd=0 bps_wr=0 iops=4000 iops_rd=0 iops_wr=0
+#sh disk-qos -i 5 -d drive-virtio-disk0 -o 4000 -p 0 -q 0 -r 0 -s 0 -t 0
+##{"return":{},"id":"libvirt-33"}
+#virsh qemu-monitor-command 5 '{ "execute": "block_set_io_throttle","arguments": {"device": "drive-virtio-disk0","iops": 4000,"iops_rd": 0,"iops_wr": 0,"bps": 0,"bps_rd": 0,"bps_wr": 0}}'
+
+usage() { echo "Usage: $0 [-i <number>] [-d <device>] [-o <iops>] [-p <iops_rd>] [-q <iops_wr>] [-r <bps>] [-s <bps_rd>] [-t <bps_wr>]" 1>&2; exit 1; }
+
+while getopts ":i:d:o:p:q:r:s:t:" o; do
+    case "${o}" in
+        i)
+            i=${OPTARG}
+            num=${i}
+            ;;
+        d)
+            d=${OPTARG}
+            device=${d}
+            ;;
+        o)
+            o=${OPTARG}
+            iops=${o}
+            ;;
+        p)
+            p=${OPTARG}
+            iops_rd=${p}
+            ;;
+        q)
+            q=${OPTARG}
+            iops_wr="${q}"
+            ;;
+        r)
+            r=${OPTARG}
+            bps="${r}"
+            ;;
+        s)
+            s=${OPTARG}
+            bps_rd="${s}"
+            ;;
+        t)
+            t=${OPTARG}
+            bps_wr="${t}"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${i}" ] || [ -z "${d}" ] || [ -z "${o}" ] || [ -z "${p}" ] || [ -z "${q}" ] || [ -z "${r}" ] || [ -z "${s}" ] || [ -z "${t}" ]; then
+    usage
+fi
+
+function disk_process(){
+    cmd="virsh qemu-monitor-command ${num} '{ \"execute\": \"block_set_io_throttle\",\"arguments\": {\"device\": \"${device}\",\"iops\": ${iops},\"iops_rd\": ${iops_rd},\"iops_wr\": ${iops_wr},\"bps\": ${bps},\"bps_rd\": ${bps_rd},\"bps_wr\": ${bps_wr}}}'"
+    eval ${cmd}
+    echo ${cmd}
+}
+
+disk_process
+echo "End"

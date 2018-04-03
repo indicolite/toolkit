@@ -1,0 +1,122 @@
+#!/bin/bash
+#set -x 
+
+set_max(){
+    for CPU in $LIST; do
+        `echo "$VALUE" > "$CGROUP_BASE$NAME$CPU/$KEY"`
+    done;
+
+}
+set_share(){
+    for CPU in $LIST; do
+        PID=`cat "$CGROUP_BASE$NAME$CPU/tasks"`
+        RET=`taskset -pc "${CPU:4}" "$PID" `
+
+        `echo "$VALUE" > "$CGROUP_BASE$NAME$CPU/$KEY"`
+    done;
+
+}
+
+cgroup_show(){
+    for CPU in $LIST; do
+        PID=`cat "$CGROUP_BASE$NAME$CPU/tasks"`
+        RET=`taskset -p "$PID" `
+        echo $RET
+        RET=`cat "$CGROUP_BASE$NAME$CPU/cpu.cfs_period_us"`
+        echo "period = $RET"
+        RET=`cat "$CGROUP_BASE$NAME$CPU/cpu.cfs_quota_us"`
+        echo "quota = $RET"
+        RET=`cat "$CGROUP_BASE$NAME$CPU/cpu.shares"`
+        echo "share = $RET"
+    done;
+}
+
+set_cgroup(){
+
+CGROUP_BASE="/sys/fs/cgroup/cpu/machine.slice/"
+NAME="machine-qemu\\x2d$ID\\x2d$INSTANCE.scope/"
+
+LIST=`ls "$CGROUP_BASE$NAME" |grep vcpu`
+
+
+case $TYPE in
+    max)
+         KEY=cpu.cfs_period_us
+         VALUE=100000
+         set_max
+
+         KEY=cpu.cfs_quota_us
+         VALUE=`expr $ARG \* 1000`
+         set_max      
+         ;;
+    share)
+         KEY=cpu.shares
+         VALUE=$ARG
+         set_share
+         ;;
+    show)
+         cgroup_show
+         ;;
+    *)
+         echo "invalid TYPE $TYPE";;
+     
+    esac
+}
+
+
+
+Usage() {
+        echo "qos -i INSTANCE_ID -n INSTANCE_NAME -t max/share VALUE"
+}
+
+check_value() {
+    if  [ ! -n "$ID" ] ;then
+        echo "please enter ID"
+        Usage
+        exit 1
+    fi
+    
+    if  [ ! -n "$INSTANCE" ] ;then
+        echo "please enter INSTANCE"
+        Usage
+        exit 1
+    fi
+    
+    
+    if  [ ! -n "$TYPE" ] ;then
+        echo "please enter TYPE"
+        Usage
+        exit 1
+    fi
+}
+
+
+while getopts "i:n:t:" arg
+do
+        case $arg in
+             i)
+                ID=$OPTARG;;
+             n)
+                INSTANCE=$OPTARG
+                INSTANCE=${INSTANCE//-/\\x2d};;
+             t)
+                TYPE=$OPTARG;;
+             *) echo "command not found $OPTARG"
+                Usage
+                exit 1;;
+        esac
+done
+
+shift $[$OPTIND-1]
+
+ARG=$1
+
+if [ x$1 == x ];then
+   echo "please enter value"
+   Usage
+   exit 1
+fi
+
+check_value
+
+set_cgroup 
