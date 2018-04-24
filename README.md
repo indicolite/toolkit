@@ -9,7 +9,7 @@ This code is from teddysun.com, which used to function auto-deploy shadowsocks i
 ```
 - **selenium/shadow_qrcode.py**
 This code simulates selenium to crawl dynamic data, and then into database, also saves to QRcode, periodically.
-- **selenium/crawing_blog.py**
+- **selenium/crawling_blog.py**
 This code simulates selenium to crawl blog data in xiami.group and save data into local postgresql database.
 - **selenium/tcpdump_mysql.sh**
 This code uses tcpdump to catch sql info.
@@ -18,6 +18,6 @@ This code used to create pods and service to kubernetes logging system, say, efk
 - **ansible/***
 This code used to generate ansible example codes.
 - **centos7/***
-This code refers to something automation about centos7.
+This code refers to something automation about centos7, plus with rpms for working.
 - **sockets/***
 This code refers to some linux socket snippets.
