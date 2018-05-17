@@ -1,8 +1,8 @@
 # tools
 
-- **load_data/*.py**
+- **loading/*.py**
 This code used to handle a big single file and load the filtered data into database, whose performance boost from 700+s to 8+s.
-- **load_data/shadowsocks-all.sh**
+- **loading/shadowsocks-all.sh**
 This code is from teddysun.com, which used to function auto-deploy shadowsocks in one step.
 ```
 ./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log
@@ -15,6 +15,8 @@ This code simulates selenium to crawl blog data in xiami.group and save data int
 This code uses tcpdump to catch sql info.
 - **filebeat/***
 This code used to create pods and service to kubernetes logging system, say, efk logging-data.
+- **markdown/***
+This code used to record some paper work.
 - **ansible/***
 This code used to generate ansible example codes.
 - **centos7/***
