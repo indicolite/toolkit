@@ -1,0 +1,68 @@
+[galera]
+# Mandatory settings
+wsrep_on=ON
+[mysqld]
+# (This must be substituted by wsrep_format)
+binlog_format=ROW
+# Currently only InnoDB storage engine is supported
+default-storage-engine=innodb
+# to avoid issues with 'bulk mode inserts' using autoinc
+innodb_autoinc_lock_mode=2
+# Override bind-address
+# In some systems bind-address defaults to 127.0.0.1, and with mysqldump SST
+# it will have (most likely) disastrous consequences on donor node
+bind-address=0.0.0.0
+##
+## WSREP options
+##
+wsrep_sync_wait=1
+wsrep_log_conflicts=ON
+# Full path to wsrep provider library or 'none'
+wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+# Provider specific configuration options
+wsrep_provider_options="gcache.size=16G;gcache.page_size=16G;gcs.fc_limit=1024;cert.log_conflicts=YES"
+# Logical cluster name. Should be the same for all nodes.
+wsrep_cluster_name="bingo_wsrep_cluster"
+# Group communication system handle
+wsrep_cluster_address="gcomm://10.127.2.41,10.127.2.43,"
+# Human-readable node name (non-unique). Hostname by default.
+wsrep_node_name=ha2
+# Base replication <address|hostname>[:port] of the node.
+# The values supplied will be used as defaults for state transfer receiving,
+# listening ports and so on. Default: address of the first network interface.
+wsrep_node_address=10.127.2.42
+# Address for incoming client connections. Autodetect by default.
+#wsrep_node_incoming_address=
+# How many threads will process writesets from other nodes
+# wsrep_slave_threads=1
+wsrep_slave_threads=32
+# DBUG options for wsrep provider
+#wsrep_dbug_option
+# Generate fake primary keys for non-PK tables (required for multi-master
+# and parallel applying operation)
+wsrep_certify_nonPK=1
+# Maximum number of rows in write set
+# wsrep_max_ws_rows=131072
+wsrep_max_ws_rows=256K
+# Maximum size of write set
+wsrep_max_ws_size=1073741824
+# to enable debug level logging, set this to 1
+wsrep_debug=0
+# convert locking sessions into transactions
+wsrep_convert_LOCK_to_trx=1
+# wsrep_re,try_autocommit=1
+wsrep_retry_autocommit=10
+wsrep_auto_increment_control=1
+wsrep_drupal_282555_workaround=0
+wsrep_causal_reads=0
+wsrep_notify_cmd=
+#wsrep_sst_method=rsync
+wsrep_sst_method=xtrabackup-v2
+#wsrep_sst_receive_address=
+wsrep_sst_auth=root:Abc12345
+# Desired SST donor name.
+#wsrep_sst_donor=
+# Reject client queries when donating SST (false)
+#wsrep_sst_donor_rejects_queries=0
+# Protocol version to use
+# wsrep_protocol_version=
