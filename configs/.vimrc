@@ -104,6 +104,7 @@ Plugin 'tomtom/tlib_vim'
 "Plugin 'garbas/vim-snipmate'
 " Optional:
 Plugin 'honza/vim-snippets'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 " 插件列表结束
 call vundle#end()
 filetype plugin indent on
