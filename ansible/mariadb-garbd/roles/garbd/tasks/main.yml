@@ -1,0 +1,4 @@
+- include: install_yum.yml
+  when: ansible_os_family == 'RedHat' and '{{default.install_mode}}' != 'config'
+- include: start_garbd.yml
+  

@@ -1,0 +1,16 @@
+- hosts: mariadb_nodes
+  sudo: yes
+  vars_files:
+    - "vars/default.yml"
+    - "vars/mariadb.yml"
+    - "vars/daemon.yml"
+  roles:
+    - role: common_mariadb
+- hosts: garbd_node
+  sudo: yes
+  vars_files:
+    - "vars/default.yml"
+    - "vars/mariadb.yml"
+    - "vars/garbd.yml"
+  roles:
+    - role: garbd

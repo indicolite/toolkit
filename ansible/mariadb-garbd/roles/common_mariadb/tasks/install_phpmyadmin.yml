@@ -1,0 +1,14 @@
+- name: debconf for phpmyadmin
+  debconf: name=phpmyadmin question='phpmyadmin/reconfigure-webserver' value='apache2' vtype='select'
+
+- name: debconf for phpmyadmin
+  debconf: name=phpmyadmin question='phpmyadmin/app-password-confirm' value='{{mariadb.default.password}}' vtype='password'
+
+- name: debconf for phpmyadmin
+  debconf: name=phpmyadmin question='phpmyadmin/mysql/admin-pass' value='{{mariadb.default.password}}' vtype='password'
+
+- name: debconf for phpmyadmin
+  debconf: name=phpmyadmin question='phpmyadmin/mysql/app-pass' value='{{mariadb.default.password}}' vtype='password'
+
+- name: install phpmyadmin
+  apt: pkg=phpmyadmin state=present

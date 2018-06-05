@@ -1,0 +1,4 @@
+- name: (xinetd-restart) | restart xinetd
+  service:
+    name: xinetd
+    state: restarted

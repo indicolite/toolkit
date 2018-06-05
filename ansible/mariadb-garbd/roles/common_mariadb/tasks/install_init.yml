@@ -1,0 +1,75 @@
+#- name: recover systemd files
+#  shell: cp /opt/systemd/{{item}} /usr/lib/systemd/system/{{item}}
+#  with_items:
+#    - mariadb.service
+
+- name: RedHat systemctl enable mariadb.service
+  command: systemctl enable mariadb.service
+  when: ansible_os_family == 'RedHat'
+
+- name: Delete old wsrep.cnf to conf.d
+  command: rm -f /etc/my.cnf.d/galera.cnf
+  when: ansible_os_family == 'RedHat'
+
+- name: Delete innodb files
+  command: rm -f /var/lib/mysql/{{item}}
+  with_items:
+    - ib_logfile0
+    - ib_logfile1
+    - wsrep_recovery*
+
+- name: write mariadb-server.conf
+  template: src=redhat/mariadb-server.cnf.j2 dest=/etc/my.cnf.d/mariadb-server.cnf
+  when: ansible_os_family == 'RedHat'
+
+- name: RedHat Delete mariadb auth_gssapi
+  command: rm -rf /etc/my.cnf.d/auth_gssapi.cnf
+  when: ansible_os_family == 'RedHat'
+
+- name: write mariadb.service
+  copy: src=mariadb.service dest=/usr/lib/systemd/system/mariadb.service
+  when: ansible_os_family == 'RedHat'
+
+- name: RedHat systemctl reload mariadb.service
+  command: systemctl daemon-reload
+  when: ansible_os_family == 'RedHat'
+
+- name: RedHat systemctl start mariadb.service
+  command: systemctl start mariadb.service
+  when: ansible_os_family == 'RedHat'
+
+- name: Update root password when login password is null
+  mysql_user: login_user=root login_password='' name={{mariadb.default.user}} host={{item}} password={{mariadb.default.password}}  priv=*.*:ALL,GRANT
+  with_items:
+    - localhost
+    - 127.0.0.1
+    - ::1
+    - "%"
+    - "192.%.%.%"
+    - "10.%.%.%"
+  ignore_errors: yes
+
+- name: Update root password when password has been set
+  mysql_user: login_user=root login_password={{mariadb.default.password}} name={{mariadb.default.user}} host={{item}} password={{mariadb.default.password}}  priv=*.*:ALL,GRANT
+  with_items:
+    - localhost
+    - 127.0.0.1
+    - ::1
+    - "%"
+    - "192.%.%.%"
+    - "10.%.%.%"
+  ignore_errors: yes
+
+- name: Set GRANT for root
+  command: mysql -uroot -p{{mariadb.default.password}} -e "GRANT ALL ON *.* TO {{mariadb.wsrep.user}}@'{{item}}' IDENTIFIED BY '{{mariadb.wsrep.password}}';flush privileges;"
+  with_items:
+    - localhost
+    - 127.0.0.1
+    - ::1
+    - "%"
+    - "192.%.%.%"
+    - "10.%.%.%"
+
+- name: Restart mariadb configurations after copy my.cnf file
+  service: name=mariadb state=restarted
+  when: ansible_os_family == 'RedHat'

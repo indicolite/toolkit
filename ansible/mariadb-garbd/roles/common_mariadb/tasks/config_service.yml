@@ -1,0 +1,30 @@
+#- name: enable service
+#  shell: systemctl enable {{item}}
+#  with_items:
+#    - mariadb.service
+
+- name: Copy galera_daemon.yaml to /etc/my.cnf.d/galera.yaml
+  template: src=galera_daemon.yaml.j2 dest=/etc/my.cnf.d/galera.yaml
+  when:  ansible_os_family == 'RedHat'
+
+- name: Copy mariadb-deamon.service to /usr/lib/systemd/system/mariadb-deamon.service
+  template: src=mariadb-deamon.service.j2 dest=/usr/lib/systemd/system/mariadb-deamon.service
+  when:  ansible_os_family == 'RedHat'
+
+- name: Copy mariadb scripts
+  template: src={{item}}.j2 dest=/usr/local/bin/{{item}}
+  with_items:
+    - galera_daemon.py
+
+- name: Change scripts mode
+  shell: chmod 755 /usr/local/bin/{{item}}
+  with_items:
+    - galera_daemon.py
+
+- name: enable service
+  shell: systemctl enable {{item}}.service
+  with_items:
+    - mariadb-deamon
+
+- name: Start Service mariadb-deamon
+  shell: systemctl start mariadb-deamon

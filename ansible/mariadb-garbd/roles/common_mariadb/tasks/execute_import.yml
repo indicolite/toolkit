@@ -1,0 +1,60 @@
+- name: Set GRANT for root
+  command: mysql -uroot -p{{mariadb.default.password}} -e "GRANT ALL ON *.* TO {{mariadb.wsrep.user}}@'{{item}}' IDENTIFIED BY '{{mariadb.wsrep.password}}' WITH GRANT OPTION;flush privileges;"
+  with_items:
+    - localhost
+    - 127.0.0.1
+    - ::1
+    - "%"
+    - "192.%.%.%"
+    - "10.%.%.%"
+    - "{{default.control_ip}}"
+
+- name: drop database
+  mysql_db: login_user=root login_password={{mariadb.default.password}} db={{item}} state=absent
+  with_items:
+    - keystone
+    - cinder
+    - glance
+    - nova
+    - neutron
+    - heat
+    - cloudkitty
+
+- name: Create database
+  mysql_db: login_user=root login_password={{mariadb.default.password}} db={{item}} state=present
+  with_items:
+    - keystone
+    - cinder
+    - glance
+    - nova
+    - neutron
+    - phpmyadmin
+    - heat
+    - cloudkitty
+
+- name: copy {{item}}.sql
+  copy: src=sqls/{{item}}.sql dest=/tmp/{{item}}.sql force=yes
+  with_items:
+    - keystone
+    - cinder
+    - glance
+    - nova
+    - neutron
+    - phpmyadmin
+    - heat
+    - cloudkitty
+
+- name: Import database
+  mysql_db: login_user=root login_password={{mariadb.default.password}} name={{item}} state=import target=/tmp/{{item}}.sql
+  with_items:
+    - keystone
+    - cinder
+    - glance
+    - nova
+    - neutron
+    - phpmyadmin
+    - heat
+    - cloudkitty
+
+- name: Modify keystone ip
+  command: mysql -uroot -p{{mariadb.default.password}} keystone -e "update endpoint set url = REPLACE(url, '127.0.0.1', '{{default.control_ip}}');"

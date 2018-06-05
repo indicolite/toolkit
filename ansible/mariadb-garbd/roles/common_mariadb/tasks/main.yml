@@ -1,0 +1,29 @@
+- include: install_yum.yml
+  when: ansible_os_family == 'RedHat' and '{{default.install_mode}}' != 'config'
+
+- include: install_init.yml
+  when: "'{{default.install_mode}}' != 'install'"
+
+- include: install_phpmyadmin.yml
+  when: ansible_os_family == 'Debian' and '{{default.install_mode}}' != 'config'
+
+#- include: config_ssh.yml
+#  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa'"
+
+- include: cluster_config_galera.yml
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa' and ansible_os_family == 'RedHat' and '{{default.install_mode}}' != 'install'"
+
+- include: wsrep-start-redhat.yml
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa' and ansible_os_family == 'RedHat' and '{{default.install_mode}}' != 'install'"
+#
+##- include: cluster_ap.yml
+##  when: "'{{mariadb.wsrep.cluster_type}}' == 'ap' and ansible_ssh_host == '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"
+##
+##- include: execute_import.yml
+##  when: ansible_ssh_host == "{{mariadb.wsrep.cluster_ips.split(',')[0]}}"
+#
+- include: xinetd-restart.yml
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa' and '{{default.install_mode}}' != 'install'"
+
+- include: config_service.yml
+  when: "'{{default.install_mode}}' != 'install'"

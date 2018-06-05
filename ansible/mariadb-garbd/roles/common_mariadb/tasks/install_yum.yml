@@ -1,0 +1,58 @@
+- name: stop mariadb service
+  service: name=mariadb state=stopped
+  ignore_errors: yes
+
+- name: Delete innodb files
+  command: rm -rf /var/lib/mysql/
+  sudo: root
+  ignore_errors: yes
+
+- name: Delete configurations files
+  command: rm -rf /etc/my.cnf.d/
+  sudo: root
+  ignore_errors: yes
+
+- name: Install yum removed mariadb packages
+  yum: name={{item}} state=removed
+  with_items:
+    - mariadb-server
+    - mariadb-galera-server
+    - mariadb-galera-common
+    - galera
+    - rsync
+  ignore_errors: yes
+
+- name: Install yum mariadb packages
+  yum: name={{item}} state=installed
+  with_items:
+    - mariadb
+    - mariadb-server
+    - python2-PyMySQL
+    - MySQL-python
+
+- name: Install yum mariadb packages for galera cluster
+  yum: name={{item}} state=installed
+  with_items:
+    - mariadb-galera-server
+    - mariadb-galera-common
+    - galera
+    - rsync
+    - xinetd
+    - socat
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa'"
+
+- name: (install-redhat) | copy packages
+  copy: src={{ item }} dest=/tmp/
+  with_items:
+    - libev-4.15-6.el7.x86_64.rpm
+    - percona-xtrabackup-24-2.4.3-1.el7.x86_64.rpm
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa'"
+
+- name: (install-redhat) | install packages
+  yum:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - /tmp/libev-4.15-6.el7.x86_64.rpm
+    - /tmp/percona-xtrabackup-24-2.4.3-1.el7.x86_64.rpm
+  when: "'{{mariadb.wsrep.cluster_type}}' == 'aa'"

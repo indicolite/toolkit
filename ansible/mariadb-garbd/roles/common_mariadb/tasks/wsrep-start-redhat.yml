@@ -1,0 +1,25 @@
+- name: (wsrep-start-redhat) | set environment _WSREP_NEW_CLUSTER
+  shell: systemctl set-environment _WSREP_NEW_CLUSTER=--wsrep-new-cluster
+  when: "ansible_ssh_host == '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"
+
+- name: (wsrep-start-redhat) | start mariadb cluster
+#  shell: /usr/libexec/mysqld --wsrep-new-cluster --user=root
+  shell: service mariadb start
+  when: "ansible_ssh_host == '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"
+
+- name: (wsrep-start-redhat) | unset environment _WSREP_NEW_CLUSTER
+  shell: systemctl unset-environment _WSREP_NEW_CLUSTER
+  when: "ansible_ssh_host == '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"
+
+- pause: seconds=10
+
+- name: (wsrep-start-redhat) | join mariadb cluster
+  service:
+    name: mariadb
+    state: started
+  when: "ansible_ssh_host != '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"
+  ignore_errors: yes
+
+- name: (wsrep-start-redhat) | restart mariadb cluster
+  shell: service mariadb restart
+  when: "ansible_ssh_host == '{{mariadb.wsrep.cluster_ips.split(',')[0]}}'"

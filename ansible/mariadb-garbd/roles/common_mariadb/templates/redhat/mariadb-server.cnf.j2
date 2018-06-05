@@ -1,0 +1,117 @@
+[mysqld_safe]
+nice = 0
+
+[mysqld]
+user=mysql
+basedir=/usr
+tmpdir=/tmp
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+log-error=/var/log/mariadb/mariadb.log
+log_warnings = 2
+slow_query_log_file = /var/log/mariadb/slow.log
+pid-file=/var/run/mariadb/mariadb.pid
+bind-address = "{{ansible_ssh_host}}"
+#binlog_format = ROW
+default-storage-engine = innodb
+innodb_file_per_table
+collation-server = utf8_general_ci
+character-set-server = utf8
+port = 3306
+lc_messages_dir = /usr/share/mariadb
+lc_messages = en_US
+skip-character-set-client-handshake
+skip-external-locking
+skip-name-resolve
+
+long_query_time = 3
+log_slow_verbosity = query_plan
+#log_bin = /var/log/mariadb/mariadb-bin
+#log_bin_index = /var/log/mariadb/mariadb-bin.index
+expire_logs_days = 10
+
+# Autocommit
+init_connect = 'SET autocommit=0'
+init_connect = 'SET NAMES utf8'
+init_connect = 'SET collation_connection = utf8_general_ci'
+
+max_connections     = 5000
+max_connect_errors  = 1000
+connect_timeout     = 300
+wait_timeout        = 1200
+interactive_timeout = 1200
+net_read_timeout    = 600
+net_write_timeout   = 600
+thread_cache_size   = 128
+thread_pool_max_threads = 5000
+sort_buffer_size    = 1M
+bulk_insert_buffer_size = 16M
+tmp_table_size      = 32M
+max_heap_table_size = 64M
+
+# Read the manual for more InnoDB related options. There are many!
+default_storage_engine  = InnoDB
+{% if ansible_memtotal_mb <= 2048 %}
+max_binlog_size = 32M
+max_allowed_packet  = 32M
+
+innodb_buffer_pool_size = 128M
+innodb_log_buffer_size = 48M
+innodb_log_file_size = 16M
+    {% elif ansible_memtotal_mb > 2048 and ansible_memtotal_mb <= 8192 %}
+max_binlog_size = 64M
+max_allowed_packet  = 64M
+
+innodb_buffer_pool_size = 256M
+innodb_log_buffer_size = 48M
+innodb_log_file_size = 32M
+
+    {% elif ansible_memtotal_mb > 32768 and ansible_memtotal_mb <= 65536 %}
+max_binlog_size = 100M
+max_allowed_packet  = 128M
+
+innodb_buffer_pool_size = 10G
+innodb_log_buffer_size = 2G
+innodb_log_file_size = 512M
+    {% elif ansible_memtotal_mb > 65536%}
+max_binlog_size = 256M
+max_allowed_packet  = 256M
+
+innodb_buffer_pool_size = 30G
+innodb_log_buffer_size = 4G
+innodb_log_file_size = 1M
+    {% else %}
+max_binlog_size = 128M
+max_allowed_packet  = 128M
+
+innodb_buffer_pool_size = 1024M
+innodb_log_buffer_size = 64M
+innodb_log_file_size = 64M
+{% endif %}
+
+
+innodb_file_per_table = 1
+innodb_open_files = 20480
+innodb_io_capacity = 400
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 0
+innodb_autoinc_lock_mode = 2
+innodb_doublewrite = 1
+innodb_locks_unsafe_for_binlog = 1
+innodb_print_all_deadlocks = 1
+innodb_lock_wait_timeout = 300
+
+# * Query Cache Configuration
+#
+# Cache only tiny result sets, so we can fit more in the query cache.
+query_cache_limit       = 128K
+query_cache_size        = 0
+query_cache_type        = 0
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = 16M
+
+[isamchk]
+key_buffer = 16M

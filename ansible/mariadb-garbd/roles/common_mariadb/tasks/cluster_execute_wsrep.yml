@@ -1,0 +1,8 @@
+- name: Copy mariadb installation files
+  template: src={{item}}.j2 dest=/tmp/{{item}} force=yes
+  with_items:
+    - mariadb_cluster.py
+    - mariadb_cluster.cfg
+
+- name: Config mariadb cluster
+  command: chdir=/tmp python mariadb_cluster.py

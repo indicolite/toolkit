@@ -1,0 +1,15 @@
+[Unit]
+Description=mariadb-deamon
+
+[Service]
+Type=forking
+#ExecStartPre=/usr/bin/mkdir -p ${logdir}
+ExecStart=/usr/bin/python /usr/local/bin/galera_daemon.py start
+ExecStop=/usr/bin/python /usr/local/bin/galera_daemon.py stop
+PIDFile=/tmp/galera-daemon.pid
+ExecReload=/usr/bin/python /usr/local/bin/galera_daemon.py restart
+#Restart=always
+#RestartSec=0
+
+[Install]
+WantedBy=multi-user.target

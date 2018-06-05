@@ -1,0 +1,5 @@
+# xtrabackup ##
+50 20 * * * {{mariadb.default.backup_path}}/xbackup.sh -f >/var/log/cron 2>&1
+15 */1 * * * {{mariadb.default.backup_path}}/xbackup.sh -i >/var/log/cron 2>&1
+25 23 * * * {{mariadb.default.backup_path}}/xbackup.sh -t >/var/log/cron 2>&1
+0 1 * * * {{mariadb.default.backup_path}}/xbackup.sh -c -u >/var/log/cron 2>&1

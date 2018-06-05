@@ -1,0 +1,5 @@
+default:
+  # This parameter works for separating installation and configurations.
+  # It could be normal(install+config), install(install only)
+  # and config(config only)
+  install_mode: normal

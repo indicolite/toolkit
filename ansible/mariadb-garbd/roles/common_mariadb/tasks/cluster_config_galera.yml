@@ -1,0 +1,55 @@
+- name: Set GRANT for wsrep
+  command: mysql -uroot -p{{mariadb.default.password}} -e "SET wsrep_on=OFF; GRANT ALL ON *.* TO {{mariadb.wsrep.user}}@'%' IDENTIFIED BY '{{mariadb.wsrep.password}}';"
+
+- name: Delete mysql users without password
+  command: mysql -uroot -p{{mariadb.default.password}} -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE user='';"
+
+
+- name: flush privileges
+  command: mysql -uroot -p{{mariadb.default.password}} -e "flush privileges;"
+
+- name: Delete innodb files
+  command: rm -f /var/lib/mysql/{{item}}
+  with_items:
+    - ib_logfile0
+    - ib_logfile1
+
+- name: Restart mariadb configurations after copy my.cnf file
+  service: name=mariadb state=stopped
+
+- name: write wsrep.cnf to conf.d
+  #template: src=wsrep.cnf.j2 dest=/etc/mysql/conf.d/wsrep.cnf
+  template: src=redhat/galera.cnf.j2 dest=/etc/my.cnf.d/galera.cnf
+
+- name: (configure-redhat) | Copy clustercheck
+  template:
+    src: clustercheck.j2
+    dest: /usr/bin/clustercheck
+    mode: 0755
+
+- name: (configure-redhat) | mkdir /etc/xinetd.d if not exist
+  file:
+    path: /etc/xinetd.d
+    state: directory
+    mode: 0755
+
+- name: (configure-redhat) | Copy mysqlchk
+  template:
+    src: mysqlchk.j2
+    dest: /etc/xinetd.d/mysqlchk
+
+- name: (configure-redhat) | add service of mysqlchk for /etc/services
+  lineinfile:
+    dest: /etc/services
+    regexp: '9200/tcp'
+    insertafter: '# Local services'
+    line: 'mysqlchk   9200/tcp'
+
+- name: (configure-redhat) | add xinetd service start
+  shell: systemctl enable xinetd
+
+
+
+
+  
+

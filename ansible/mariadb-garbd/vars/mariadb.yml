@@ -1,0 +1,37 @@
+mariadb:
+  default:
+    port: 3306
+    user: root
+    password: Abc12345
+    max_binlog_size: 100M
+    max_allowed_packet: 256M
+    backup_path: /home
+  debian:
+    password: rC4Wi8coyZ9tPpec
+  wsrep:
+    cluster_type: aa
+    cluster_name: fh_wsrep_cluster
+    user: root
+    password: Abc12345
+    cluster_ips: 192.168.10.13
+    # Configure it according system
+    # MEM x 0.125
+    #gcache_size: 256M
+    gcache_size: 4G
+    # MEM x 0.125
+    #gcache_page_size: 256M
+    gcache_page_size: 4G
+    gcs_fc_limit: 512
+  innodb:
+    #MEM × 0.3
+    #buffer_pool_size: 60M
+    buffer_pool_size: 10G
+    #MEM × 0.1
+    #log_buffer_size: 8M
+    log_buffer_size: 2G
+    #MEM × 0.2
+    #log_file_size: 40M
+    log_file_size: 512M
+  backup:
+    backup_path: /usr/local/bin
+    rbd_size: 1024000

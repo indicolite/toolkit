@@ -1,0 +1,4 @@
+- name: enabled garbd service
+  shell: systemctl enable garbd.service
+- name: start garbd service
+  shell: service garbd start

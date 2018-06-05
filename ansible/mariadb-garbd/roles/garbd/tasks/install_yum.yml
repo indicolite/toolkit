@@ -1,0 +1,8 @@
+- name: Install yum mariadb packages for galera cluster
+  yum: name={{item}} state=installed
+  with_items:
+    - galera
+  ignore_errors: yes
+
+- name: copy garbd file
+  template: src=garb.j2 dest=/etc/sysconfig/garb

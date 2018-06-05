@@ -1,0 +1,15 @@
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  pass: Abc12345
+daemon:
+  pid: /tmp/galera-daemon.pid
+  critical_log: /var/log/galera-daemon-critical.log
+  def_tty: /dev/tty0
+  host: 0.0.0.0
+  port: 9875
+logger:
+  location: /var/log/galera-daemon.log
+  name: galera-log
+  rotation_time: 30
