@@ -178,8 +178,4 @@ $ sudo virsh secret-set-value --secret {uuid of secret} --base64 $(cat client.ci
             <target dev='vdb' bus='virtio'/>
             <shareable/>
 </disk>
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> ebd5a7c36621e3bf0032cae7509f1f17c407e078
