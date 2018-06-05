@@ -1,4 +1,6 @@
 [TOC]
+
+
 #MariaDB基础培训
 ##历史背景
 * MariaDB 分支始于2009年的MySQL被Oracle收购。
