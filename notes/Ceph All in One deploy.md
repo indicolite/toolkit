@@ -152,11 +152,7 @@ $ sudo virsh secret-set-value --secret {uuid of secret} --base64 $(cat client.ci
 </disk>
 ```
 
-<<<<<<< HEAD
 如下volume2.xml中的uuid
-=======
-如下volume3.xml中的uuid
->>>>>>> ebd5a7c36621e3bf0032cae7509f1f17c407e078
 ```
 <disk type='network' device='disk'>
        <auth username='admin'>
