@@ -156,17 +156,12 @@ Create Table: CREATE TABLE `history` (
 ### Galera状态机
 ![Alt text](http://galeracluster.com/documentation-webpages/_images/galerafsm.png)
    
-   Open：节点机器node启动成功，尝试与集群Primary节点建立连接，这个时候如果失败则根据配置退出或创建新的集群
-   
-   Primary：节点已经处于集群中，在新节点加入时会选取Donor进行数据同步
-   
-   Joiner：节点机器node发送state transfer状态成功，然后开始缓存write-set开始同步状态
-   
-   Joined：节点机器node收到state snapshot transfer快照，随即开始apply刚刚缓存的wirte-set，尝试保持和集群进度一致的过程状态
-   
-   Synced：节点机器node追平了集群的write-set，完成了同步并和集群进度保持一致。这个时候它的wsrep_ready状态变成1，开始处理事务操作
-   
-   Donor: 节点机器node收到一个state transfer请求，此时节点处于为新节点提供全量数据数据同步时的状态。此时该节点对客户端不提供服务
+   - Open：节点机器node启动成功，尝试与集群Primary节点建立连接，这个时候如果失败则根据配置退出或创建新的集群
+   - Primary：节点已经处于集群中，在新节点加入时会选取Donor进行数据同步
+   - Joiner：节点机器node发送state transfer状态成功，然后开始缓存write-set开始同步状态
+   - Joined：节点机器node收到state snapshot transfer快照，随即开始apply刚刚缓存的wirte-set，尝试保持和集群进度一致的过程状态
+   - Synced：节点机器node追平了集群的write-set，完成了同步并和集群进度保持一致。这个时候它的wsrep_ready状态变成1，开始处理事务操作
+   - Donor: 节点机器node收到一个state transfer请求，此时节点处于为新节点提供全量数据数据同步时的状态。此时该节点对客户端不提供服务
    
 ### Primary Component
    为避免单点故障，在网络故障发生时，集群可能分成几个部分。在此情形下，只有其中一个数据部分可以继续修改数据库状态用来避免历史数据的不一致，集群的这部分称为Primary Component。
