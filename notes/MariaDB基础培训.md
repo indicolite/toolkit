@@ -148,12 +148,14 @@ Create Table: CREATE TABLE `history` (
    主要缺点体现在性能差，节点越多性能越差。
 ### 技术细节
 ![Alt text](http://galeracluster.com/documentation-webpages/_images/certificationbasedreplication.png)
+
    Galera Cluster的同步时事务级别的，其实现了基于认证的复制，使用集群间通信和事务排序技术来实现同步复制。自身是支持multi-master的，并且官方宣称写操作是同步的。大致过程如下：
    创建事务时生成一个全局的事务ID，commit时严格按照ID顺序进行提交；
    当客户端提交commit时，事务涉及所有修改的主键合并到一个write-set，这个write-set会送到集群中所有节点；节点收到write-set之后，会对其进行认证，检测是否会和本地的事务冲突，以此决定认证的成败；
    当主节点收到其他节点认证成功的返回后，本地commit；如果失败，会对事务进行回滚，客户会收到dead lock。
 ### Galera状态机
 ![Alt text](http://galeracluster.com/documentation-webpages/_images/galerafsm.png)
+   
    Open：节点机器node启动成功，尝试与集群Primary节点建立连接，这个时候如果失败则根据配置退出或创建新的集群
    Primary：节点已经处于集群中，在新节点加入时会选取Donor进行数据同步
    Joiner：节点机器node发送state transfer状态成功，然后开始缓存write-set开始同步状态
