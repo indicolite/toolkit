@@ -1,6 +1,6 @@
 [TOC]
-##前言
-##虚拟机的准备
+## 前言
+## 虚拟机的准备
 创建第一台虚拟机
 安装操作系统
 配置第一台虚拟机
@@ -16,7 +16,7 @@
 将磁盘设置为共享磁盘
 将共享磁盘添加到第二台虚拟机
 
-##环境的准备
+## 环境的准备
 配置操作系统
 安装依赖包
 配置内核参数
@@ -36,14 +36,14 @@
 安装ASMLIB
 创建分区
 创建磁盘组
-##网格基础设施的安装
+## 网格基础设施的安装
 安装CVU
 安装网格基础设施
 创建其他磁盘组
-##数据库软件的安装
-##数据库实例的创建
+## 数据库软件的安装
+## 数据库实例的创建
 
-##简介
+## 简介
 Oracle Real Application Cluster (RAC) 数据库是一种集群数据库，它允许集群中的两台或多台节点同时访问一个共享数据库。其架构的最大特点是共享存储架构，整个 RAC 集群是建立在一个共享的存储设备之上的，节点之间采用高速网络互联。业务连续性、高可用性、可伸缩性、灵活性和敏捷性与轻松的管理相结合，是成功 IT 基础架构和云部署的支柱。
 
 OracleRAC 提供了非常好的高可用特性，比如负载均衡和应用透明切块（TAF），其最大的优势在于对应用完全透明，应用无需修改便可切换到RAC 集群。因为整个集群都依赖于底层的共享存储，所以共享存储的 I/O 能力和可用性决定了整个集群的可以提供的能力，对于 I/O 密集型的应用，这样的机制决定后续扩容只能是 Scale Up类型，对于硬件成本、开发人员的要求、维护成本都相对比较高。新的架构中，采用 ASM 来整合多个存储设备的能力，使得 RAC 底层的共享存储设备具备线性扩展的能力，整个集群不再依赖于大型存储的处理能力和可用性。
@@ -52,7 +52,7 @@ RAC 的另外一个问题是，随着节点数的不断增加，节点间通信�
 * 节点间通信使用高速互联网络；
 * 尽可能将不同的应用分布在不同的节点上。
 
-##原理
+## 原理
 Oracle RAC 数据库是一种集群数据库，它允许集群中的两台或多台节点同时访问一个共享数据库。这将有效地创建一个跨越多个硬件系统的数据库系统，同时对应用程序而言像是一个统一的数据库。在集群中，彼此独立的服务器组成一个服务器池，并作为一个系统协同工作。服务器池提供了比单对称多处理器 (SMP) 系统更好的容错方式和模块化系统扩展方式。在系统发生故障时，服务器池仍可为用户提供高可用性。对关键任务数据的访问不会丢失。冗余的硬件组件（如额外的服务器、网络连接和磁盘）为高可用性提供了保障。此类冗余硬件架构避免了单点故障并提供了卓越的故障恢复能力。
 
 RAC 体系结构的一个主要优势是多个节点内建的容错性能。由于物理节点单独运行，因此其中一个或多个节点的故障将不会影响到集群内其它节点。故障切换可在网格内任一节点上进行。即使在最恶劣的情况下，包括只有一个节点没有停止工作，真正应用集群仍将能够提供数据库服务。这一体系结构允许将一组节点联网或与网络断开，以进行维护，而同时其它节点能够继续提供数据库服务。
@@ -65,16 +65,16 @@ RAC 是一种全共享式架构，服务器池中的所有服务器共享用于 
 RAC 是一种全共享式架构，因此卷管理和文件系统必须支持集群识别。Oracle 建议使用 Oracle Database 11g 包含的特性 Oracle Automatic Storage Management (ASM)，为数据库实现各种存储池的自动化管理。ASM 提供了异步 I/O 存储子系统的性能，并可以简化文件系统的管理。它在所有可用资源中分配 I/O 负载，以便在消除手动 I/O 调优需求的同时优化性能。Oracle Database 11gR2 中的 ASM 还附带一个动态卷管理器和一个通用文件系统。此外，Oracle 也支持特定、经过认证的集群文件系统，如可在 Windows 和 Linux 上使用的
 Oracle Cluster File System (OCFS)，即 OCFS2。以及更新的 Oracle ASM Cluster File System (ACFS)，即 ACFS。
 
-##软件
-###1. ceph 10.2.5
-###2. centos 7.4 1708
-###3. oracle 11.2.0.4
-###3. rbd方式
+## 软件
+### 1. ceph 10.2.5
+### 2. centos 7.4 1708
+### 3. oracle 11.2.0.4
+### 3. rbd方式
 
-##安装
+## 安装
 本篇尝试验证在ceph卷方式下的搭建。
-###0. ceph搭建
-###1. 虚拟机的准备
+### 0. ceph搭建
+### 1. 虚拟机的准备
 kvm方式创建两个虚拟机，xml类似如下，确保每个虚拟机有两块网卡。
 ```
 <domain type='kvm'>
@@ -146,7 +146,7 @@ kvm方式创建两个虚拟机，xml类似如下，确保每个虚拟机有两�
     <shareable/>
 </disk>
 ```
-###2. 环境的准备
+### 2. 环境的准备
 执行如下操作，安装依赖包（所有节点操作）。
 ```
 yum -y install binutils compat-libcap1 compat-libstdc++ compat-libstdc++-33 e2fsprogs e2fsprogs-libs glibc glibc glibc-devel glibc-devel ksh libgcc libgcc libstdc++ libstdc++ libstdc++-devel libstdc++-devel libaio libaio libaio-devel libaio-devel libXtst libXtst libX11 libX11 libXau libXau libxcb libxcb libXi libXi make net-tools nfs-utils sysstat smartmontools
@@ -201,7 +201,7 @@ chmod -R 775 /u01/
 #racscan
 192.168.122.246	racscan
 ```
-###3. grid的安装
+### 3. grid的安装
 需要修改的环境变量文件部分（所有节点都要操作，注意替换 ORACLE_SID）。
 ```
 export PATH
@@ -216,7 +216,7 @@ export LC_ALL=en_US.UTF-8
 ```
 采用图形化的安装方式或者静默安装，过程省略。
 推荐使用 asmca 辅助工具来创建 asm 磁盘组。
-###4. database的安装
+### 4. database的安装
 需要修改的环境变量文件部分（所有节点都要操作，注意替换 ORACLE_SID）。
 ```
 export PATH
@@ -231,9 +231,9 @@ export NLS_LANG=AMERICAN_AMERICA.UTF8
 export LC_ALL=en_US.UTF-8
 ```
 采用图形化的安装方式或者静默安装，过程省略。
-###5. instance的创建
+### 5. instance的创建
 推荐采用 dbca 辅助工具来安装，过程省略。
-###6. 简单验证
+### 6. 简单验证
 分别在 server1 和 server2 上执行 lsnrctl status 查看实例运行状态。
 ```
 [oracle@server1 ~]$ lsnrctl status
@@ -337,14 +337,14 @@ Elapsed: 00:00:00.01
 通过企业管理器控制台 em 界面查看。
 ![text](/Users/urmcdull/Downloads/RAC安装/cluster_status.jpeg)
 
-##问题
-###1. 安装过程中弹出的对话框显示不完整
+## 问题
+### 1. 安装过程中弹出的对话框显示不完整
 该问题在centos系列的虚拟机以及真实的物理环境中都会出现。
 默认安装都是直接运行安装文件，这种默认安装就会出现上述问题。为了避免该情况可以通过指定参数安装：
 ```
 ./runInstaller -jreLoc /usr/lib/jvm/jre-1.8.0
 ```
-###2. [INS-41112] Specified network interface doesnt maintain connectivity across cluster”错误
+### 2. [INS-41112] Specified network interface doesnt maintain connectivity across cluster”错误
 需要确认并**关闭**防火墙。
 ```
 [root@server2 ~]# systemctl status firewalld.service 
@@ -353,7 +353,7 @@ Elapsed: 00:00:00.01
    Active: inactive (dead)
      Docs: man:firewalld(1)
 ```
-###3. installation error in invoking target 'agent nmhs'
+### 3. installation error in invoking target 'agent nmhs'
 ```
 ##When you start to install with ./runInstaller, run in another terminal window (as root) 
 ls $ORACLE_HOME/sysman/lib/ins_emagent.mk
@@ -375,7 +375,7 @@ vim /u01/app/oracle/product/11.2.0/dbhome_1/sysman/lib/ins_emagent.mk
 175 $(SYSMANBIN)emdctl:
 176         $(MK_EMAGENT_NMECTL) -lnnz11
 ```
-###4. centos7 安装oracle rac 11.2.0.4执行root.sh报错ohasd failed to start
+### 4. centos7 安装oracle rac 11.2.0.4执行root.sh报错ohasd failed to start
 报错原因：centos7使用了systemd而不是init运行进程和重启进程，而root.sh通过init.d运行ohasd进程。
 解决办法：在centos7中ohasd需要被设置为一个服务，在运行脚本root.sh之前。
 ```
@@ -414,14 +414,14 @@ systemctl start ohasd.service
 2018-05-09 15:15:44 server1 systemd[1]: Started Oracle High Availability Services.
 2018-05-09 15:15:44 server1 systemd[1]: Starting Oracle High Availability Services...
 ```
-###5. oracle asmlib 下载地址
+### 5. oracle asmlib 下载地址
 http://www.oracle.com/technetwork/server-storage/linux/asmlib/ol7-2352094.html
 http://www.oracle.com/technetwork/server-storage/linux/asmlib/rhel7-2773795.html
-###6. PRVF-0002: Could not retrieve local nodename
+### 6. PRVF-0002: Could not retrieve local nodename
 依次检查几个节点里的三个文件，确保里面填写的 hostname 是一致的。修改完毕以后需要重启机器方可生效。 /etc/hosts，/etc/hostname，/etc/sysconfig/network
-###7. Failed to register Grid Infrastructure type ora.mdns.type
+### 7. Failed to register Grid Infrastructure type ora.mdns.type
 https://blog.csdn.net/carry9148/article/details/52252755
-##链接
+## 链接
 http://www.oracle.com/technetwork/database/options/clustering/learnmore/index.html
 http://www.oracle.com/technetwork/cn/products/clustering/rac-wp-12c-1896129-zhs.pdf
 http://www.oracle.com/technetwork/database/options/clustering/overview/s298716-oow2008-perf-130776.pdf
