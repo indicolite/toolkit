@@ -66,10 +66,10 @@ RAC 是一种全共享式架构，因此卷管理和文件系统必须支持集�
 Oracle Cluster File System (OCFS)，即 OCFS2。以及更新的 Oracle ASM Cluster File System (ACFS)，即 ACFS。
 
 ## 软件
-### 1. ceph 10.2.5
-### 2. centos 7.4 1708
-### 3. oracle 11.2.0.4
-### 3. rbd方式
+- ceph 10.2.5
+- centos 7.4 1708
+- oracle 11.2.0.4
+- rbd方式
 
 ## 安装
 本篇尝试验证在ceph卷方式下的搭建。
