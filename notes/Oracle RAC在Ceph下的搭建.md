@@ -61,7 +61,7 @@ RAC 中通过几个特别的进程与 GRD 相结合，使得 RAC 可以使用缓
 * Oracle 11.2.0.4
 
 本篇在 Ceph 共享卷方式下采用rbd方式的搭建，用来验证 Ceph 共享卷对 RAC 的支持。
-###0. 网络规划
+### 0. 网络规划
 在 Oracle 11gR2 中，安装 RAC 发生了显著变化。在这之前，安装 RAC 的步骤是先安装 Crs，再安装 Database，而到了 11gR2 的时代，Crs 与 Asm 被集成在一起，合称为 Grid。因此必须先安装Grid 以后，才能继续安装 Database。从 Oracle 11.2 开始，对网络 IP 地址有特殊要求，增加 SCAN IP，所以从 11.2开始至少需要 4 种 IP 地址。
 * 首先是公网地址。可以将 eth0 和 eth1 绑定成 bond0，作为 RAC 的公网地址，提供外部通信。
 * 其次是私网地址。可以将 eth2 和 eth3 绑定为 bond1，作为 RAC 的私网地址，提供内部心跳通信。
@@ -72,7 +72,7 @@ RAC 中通过几个特别的进程与 GRD 相结合，使得 RAC 可以使用缓
 | ------- | -------------- | --------------- | -------------- | ------- | --------------- |
 | server1 | 192.168.122.62 | 192.168.123.31  | 192.168.122.63 | racscan | 192.168.122.246 |
 | server2 | 192.168.122.30 | 192.168.123.186 | 192.168.122.64 | racscan | 192.168.122.246 |
-###1. Ceph 搭建
+### 1. Ceph 搭建
 Ceph 的搭建过程略过。
 ```
 [root@ceph ~]# ceph -s
@@ -112,7 +112,7 @@ brwxrwxrwx 1 grid oinstall 252, 33 5月  14 16:31 DATA
 brwxrwxrwx 1 grid oinstall 252, 49 5月  14 16:31 FRA
 brwxrwxrwx 1 grid oinstall 252, 17 5月  14 16:31 OCRS
 ```
-###2. 虚拟机的准备
+### 2. 虚拟机的准备
 采用 kvm 方式创建两个虚拟机，xml 类似如下，确保每个虚拟机有两块网卡。
 ```
 <domain type='kvm'>
@@ -184,7 +184,7 @@ brwxrwxrwx 1 grid oinstall 252, 17 5月  14 16:31 OCRS
     <shareable/>
 </disk>
 ```
-###3. 环境的准备
+### 3. 环境的准备
 执行如下操作，安装依赖包（所有节点操作）。
 ```
 yum -y install binutils compat-libcap1 compat-libstdc++ compat-libstdc++-33 e2fsprogs e2fsprogs-libs glibc glibc glibc-devel glibc-devel ksh libgcc libgcc libstdc++ libstdc++ libstdc++-devel libstdc++-devel libaio libaio libaio-devel libaio-devel libXtst libXtst libX11 libX11 libXau libXau libxcb libxcb libXi libXi make net-tools nfs-utils sysstat smartmontools
@@ -239,7 +239,7 @@ chmod -R 775 /u01/
 #racscan
 192.168.122.246	racscan
 ```
-###4. Grid 的安装
+### 4. Grid 的安装
 需要修改的环境变量文件部分（所有节点都要操作，注意替换如 ORACLE_SID=+ASM2）。
 ```
 export PATH
@@ -254,7 +254,7 @@ export LC_ALL=en_US.UTF-8
 ```
 采用图形化的安装方式或者静默安装，过程省略。
 推荐使用 asmca 辅助工具来创建 asm 磁盘组。
-###4. Database 的安装
+### 5. Database 的安装
 需要修改的环境变量文件部分（所有节点都要操作，注意替换如 ORACLE_SID=orcl2）。
 ```
 export PATH
@@ -269,9 +269,9 @@ export NLS_LANG=AMERICAN_AMERICA.UTF8
 export LC_ALL=en_US.UTF-8
 ```
 采用图形化的安装方式或者静默安装，过程省略。
-###5. Instance 的创建
+### 6. Instance 的创建
 推荐采用 dbca 辅助工具来安装，过程省略。
-###6. 简单验证
+### 7. 简单验证
 分别在 server1 和 server2 上执行 lsnrctl status 查看实例运行状态。
 ```
 [oracle@server1 ~]$ lsnrctl status
