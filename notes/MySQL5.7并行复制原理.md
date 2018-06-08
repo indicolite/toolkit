@@ -62,9 +62,9 @@ $ mysqlbinlog mysql-bin.000012|grep last_commit
 |机器名	|IP地址	|MySQL角色|
 |dev-master-01	|192.168.100.210	|MySQL 主库
 |dev-node-02	|192.168.100.212	|MySQL 从库
-###安装MySQL
+### 安装MySQL
 MySQL 安装比较简单，在 「MySQL 5.7多源复制实践」一文中我们也讲了，这里就不在重复讲了。如果你还不会安装，可以先参考此文安装好 MySQL 。
-###启用MySQL并行复制
+### 启用MySQL并行复制
 MySQL 5.7的并行复制建立在组提交的基础上，所有在主库上能够完成 Prepared 的语句表示没有数据冲突，就可以在 Slave 节点并行复制。
 
 关于 MySQL 5.7 的组提交，我们要看下以下的参数：
@@ -125,7 +125,7 @@ mysql> show variables like 'slave_parallel_%';
 
 我们上面设置的线程数是 4 ，从库就能看到 4 个 Coordinator（协调器）进程。
 ![](https://www.hi-linux.com/img/linux/mysql-mts-1.png)
-###并行复制配置与调优
+### 并行复制配置与调优
 开启 MTS 功能后，务必将参数 master-info-repository 设置为 TABLE ，这样性能可以有 50%~80% 的提升。这是因为并行复制开启后对于 master.info 这个文件的更新将会大幅提升，资源的竞争也会变大。
 
 在 MySQL 5.7 中，推荐将 master-info-repository 和 relay-log-info-repository 设置为 TABLE ，来减小这部分的开销。
