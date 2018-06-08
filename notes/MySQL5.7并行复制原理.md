@@ -1,6 +1,6 @@
 [TOC]
 
-##MySQL 5.7并行复制原理
+## MySQL 5.7并行复制原理
 
 MySQL 从 5.6 开始引入了多库并行主从复制，但是其并行只是基于 Schema 的，也就是基于库的。如果用户的 MySQL 数据库实例中存在多个 Schema，对于从机复制的速度的确可以有比较大的帮助。MySQL 5.6 并行复制的架构如下所示：
 ![](https://www.hi-linux.com/img/linux/mysql-mts-0.png)
@@ -55,8 +55,8 @@ $ mysqlbinlog mysql-bin.000012|grep last_commit
 
 上述的 last_committed 和 sequence_number 代表的就是所谓的 LOGICAL_CLOCK 。
 
-##配置MySQL并行复制
-###环境准备
+## 配置MySQL并行复制
+### 环境准备
 这里一共使用了二台机器，MySQL 版本都为 5.7.18。
 
 |机器名	|IP地址	|MySQL角色|
@@ -120,7 +120,7 @@ mysql> show variables like 'slave_parallel_%';
 +------------------------+---------------+
 2 rows in set (0.00 sec)
 ```
-###检查Worker线程的状态
+### 检查Worker线程的状态
 当前的 Slave 的 SQL 线程为 Coordinator（协调器），执行 Relay log 日志的线程为 Worker(当前的 SQL 线程不仅起到协调器的作用，同时也可以重放 Relay log 中主库提交的事务)。
 
 我们上面设置的线程数是 4 ，从库就能看到 4 个 Coordinator（协调器）进程。
@@ -134,7 +134,7 @@ master-info-repository = table
 relay-log-info-repository = table
 relay-log-recovery = ON
 ```
-###并行复制监控
+### 并行复制监控
 复制的监控依旧可以通过 SHOW SLAVE STATUS\G，但是 MySQL 5.7 在 performance_schema 架构下多了以下这些元数据表，用户可以更细力度的进行监控：
 ```
 mysql> use performance_schema;
@@ -153,7 +153,7 @@ mysql> show tables like 'replication%';
 +---------------------------------------------+
 8 rows in set (0.00 sec)
 ```
-###参考文档
+### 参考文档
 http://www.google.com
 http://www.blogs8.cn/posts/2AR0c5
 http://www.weidu8.net/wx/1000149002520518
