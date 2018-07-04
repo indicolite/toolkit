@@ -1,2 +1,4 @@
 #based on suffixes, to generate git diff info
 #git diff 74d9e9c151dc7ee8c33b9d489fd5782bfc0db5da 251a29283fcd8f3962e73482366f23116581c1bc -- **/*.h **/*.c **/*.conf > bingo.patch
+#
+#wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
