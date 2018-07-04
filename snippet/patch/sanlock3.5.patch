@@ -1,0 +1,614 @@
+diff --git a/sourcecode/sanlock-3.5.0/src/client.c b/sourcecode/sanlock-3.5.0/src/client.c
+index 45aa06a..585c2a1 100644
+--- a/sourcecode/sanlock-3.5.0/src/client.c
++++ b/sourcecode/sanlock-3.5.0/src/client.c
+@@ -1186,6 +1186,85 @@ int sanlock_acquire(int sock, int pid, uint32_t flags, int res_count,
+ 	return rv;
+ }
+ 
++int sanlock_resignin(int pid)
++{
++	int sock, rv;
++	//char scan_ifdup_pid[100];
++
++	char pid_to_str[10];
++	sprintf(pid_to_str, "%d", pid);
++	/***
++	strcpy(scan_ifdup_pid, "ps aux|grep resignin|grep -v grep|grep ");
++	strcat(scan_ifdup_pid, pid_to_str);
++	strcat(scan_ifdup_pid, "|wc -l|awk '{if($0>0) print $0}'");
++	//sleep(1);
++
++	FILE *fp;
++	char buffer[10];
++	int num;
++	fp = popen(scan_ifdup_pid, "r");
++	while((fgets(buffer,sizeof(buffer),fp))!=NULL)
++	{
++		int i=strlen(buffer);
++		if(buffer[i-1]=='\n')
++		{
++			buffer[i-1]=0;
++		}
++	}
++	num = buffer[0]-'0';
++	***/
++
++	char scan_ifdup_pid1[100];
++	strcpy(scan_ifdup_pid1, "sanlock client status|grep ");
++	strcat(scan_ifdup_pid1, pid_to_str);
++	strcat(scan_ifdup_pid1, "|wc -l|awk '{if($0>0) print $0}'");
++
++	FILE *fp1;
++	char buffer1[10];
++	int num1 = 0;
++	fp1 = popen(scan_ifdup_pid1, "r");
++	if ((fgets(buffer1,sizeof(buffer1),fp1)) ==NULL)
++	{
++		//return 0;
++		goto out;
++	}
++	
++	/***
++	while((fgets(buffer1,sizeof(buffer1),fp1))!=NULL)
++	{
++		int i1=strlen(buffer1);
++		if(buffer1[i1-1]=='\n')
++		{
++			buffer1[i1-1]=0;
++		}
++	}
++	num1 = buffer1[0]-'0';
++	***/
++	num1 = atoi(buffer1);
++
++	//if (num > 1 || num1 >= 2) {
++	//if (num > 1 || num1 > 0) {
++	if (num1 > 0) {
++		return -1;
++	}
++
++out:
++	rv = connect_socket(&sock);
++	if (rv < 0)
++		//rv = -2;
++		return rv;
++
++	rv = send_header(sock, SM_CMD_RESIGNIN, 0, 0, 0, pid);
++	if (rv < 0) {
++		rv = -2;
++		close(sock);
++		return rv;
++	}
++	
++	return 0;
++	//return sock;
++}
++
+ int sanlock_inquire(int sock, int pid, uint32_t flags, int *res_count,
+ 		    char **res_state)
+ {
+diff --git a/sourcecode/sanlock-3.5.0/src/cmd.c b/sourcecode/sanlock-3.5.0/src/cmd.c
+index 453a1b6..321e421 100644
+--- a/sourcecode/sanlock-3.5.0/src/cmd.c
++++ b/sourcecode/sanlock-3.5.0/src/cmd.c
+@@ -53,6 +53,8 @@ void client_free(int ci);
+ void client_recv_all(int ci, struct sm_header *h_recv, int pos);
+ void client_pid_dead(int ci);
+ void send_result(int fd, struct sm_header *h_recv, int result);
++void send_helper_kill(struct space *sp, struct client *cl, int sig);
++void kill_pids(struct space *sp);
+ 
+ static uint32_t token_id_counter = 1;
+ 
+@@ -2793,6 +2795,7 @@ void call_cmd_daemon(int ci, struct sm_header *h_recv, int client_maxi)
+ {
+ 	int rv, pid, auto_close = 1;
+ 	int fd = client[ci].fd;
++	struct space *sp;
+ 
+ 	switch (h_recv->cmd) {
+ 	case SM_CMD_REGISTER:
+@@ -2821,6 +2824,50 @@ void call_cmd_daemon(int ci, struct sm_header *h_recv, int client_maxi)
+ 		memset(client[ci].tokens, 0, sizeof(struct token *) * SANLK_MAX_RESOURCES);
+ 		auto_close = 0;
+ 		break;
++	case SM_CMD_RESIGNIN:
++	
++		pid = h_recv->data2;
++		log_debug("cmd_resignin ci %d fd %d pid %d", ci, fd, pid);
++		snprintf(client[ci].owner_name, SANLK_NAME_LEN, "%d", pid);
++		client[ci].pid = pid;
++		client[ci].deadfn = client_pid_dead;
++		//client[ci].deadfn = 0;
++
++		if (client[ci].tokens) {
++			log_error("cmd_resignin ci %d fd %d tokens exist slots %d",
++				  ci, fd, client[ci].tokens_slots);
++			free(client[ci].tokens);
++		}
++		client[ci].tokens_slots = SANLK_MAX_RESOURCES;
++		client[ci].tokens = malloc(sizeof(struct token *) * SANLK_MAX_RESOURCES);
++		if (!client[ci].tokens) {
++			rv = -ENOMEM;
++			log_error("cmd_resignin ci %d fd %d ENOMEM", ci, fd);
++			break;
++		}
++		memset(client[ci].tokens, 0, sizeof(struct token *) * SANLK_MAX_RESOURCES);
++		auto_close = 0;
++		break;
++	case SM_CMD_KILLALL:
++		
++		/****
++		pthread_mutex_lock(&spaces_mutex);
++		sp = find_lockspace("__LIBVIRT__DISKS__");
++		if (sp)
++			log_debug("cmd_killall sp %p get okay", sp);
++		pthread_mutex_unlock(&spaces_mutex);
++                // kill all pid
++                sp->killing_pids = 1 ;
++		kill_pids(sp);
++		****/
++		for (ci = 0; ci <= client_maxi; ci++) {
++			if(client[ci].pid > 0 && (*client[ci].tokens != NULL)) {
++				//send_helper_kill(sp, &client[ci], SIGKILL);
++				kill(client[ci].pid, SIGKILL);
++				log_debug("cmd_killall with pid %d get okay", client[ci].pid);
++			}
++		}	
++		break;
+ 	case SM_CMD_RESTRICT:
+ 		cmd_restrict(ci, fd, h_recv);
+ 		auto_close = 0;
+diff --git a/sourcecode/sanlock-3.5.0/src/main.c b/sourcecode/sanlock-3.5.0/src/main.c
+index 7e905a9..56165fa 100644
+--- a/sourcecode/sanlock-3.5.0/src/main.c
++++ b/sourcecode/sanlock-3.5.0/src/main.c
+@@ -114,7 +114,8 @@ static void close_helper(void)
+  * msgs before getting EAGAIN.
+  */
+ 
+-static void send_helper_kill(struct space *sp, struct client *cl, int sig)
++void send_helper_kill(struct space *sp, struct client *cl, int sig);
++void send_helper_kill(struct space *sp, struct client *cl, int sig)
+ {
+ 	struct helper_msg hm;
+ 	int rv;
+@@ -561,7 +562,8 @@ static int client_using_space(struct client *cl, struct space *sp)
+ 	return rv;
+ }
+ 
+-static void kill_pids(struct space *sp)
++void kill_pids(struct space *sp);
++void kill_pids(struct space *sp)
+ {
+ 	struct client *cl;
+ 	uint64_t now, last_success;
+@@ -730,6 +732,242 @@ static unsigned int time_diff(struct timeval *begin, struct timeval *end)
+ 	return (result.tv_sec * 1000) + (result.tv_usec / 1000);
+ }
+ 
++static void scan_uuids(void)
++{
++	time_t rawtime;
++	FILE *outfile;
++
++	int ci;
++	outfile = fopen("/tmp/temp_uuid.txt", "w+");
++	if(outfile == NULL) {
++		log_debug("fopen temp_uuid file failed");
++	}
++	char tempf[256];
++	FILE *tempfile;
++	int c;
++	for (ci = 0; ci <= client_maxi; ci++) {
++		if (client[ci].pid > 0) {
++			log_debug("in ask_hastack: cmd_kill %d %s", client[ci].pid, client[ci].owner_name);
++			//fprintf(outfile, "%s\n", client[ci].owner_name);
++			sprintf(tempf, "/proc/%d/cmdline", client[ci].pid);
++			tempfile=fopen(tempf, "r");
++			if (tempfile) {
++				//while ((c = getc(tempfile)) != ',') {
++				while ((c = getc(tempfile)) != EOF) {
++					fprintf(outfile,"%c", c);
++				}
++			}
++			fprintf(outfile, "\n");
++			fclose(tempfile);
++		}
++	}
++	fclose(outfile);
++	char cmds[]="awk --re-interval '{print gensub(/(^.*)([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})(.*$)/,\"\\\\2\",\"g\")}' /tmp/temp_uuid.txt > /tmp/temp_uuids.txt";
++	FILE *of;
++	int fd;
++	of = fopen("/tmp/awks.sh", "w+");
++	if (of == NULL) {
++		log_debug("generate /tmp/awks failed");
++	}
++	fprintf(of, "%s", cmds);
++	fclose(of);
++	fd = open("/tmp/awks.sh", O_RDONLY);	
++	fchmod(fd, S_IRWXU|S_IRWXG|S_IRWXO|S_IXOTH);
++	close(fd);
++	const char * envp[] = {"PWD=/tmp", NULL};
++	if (fork()==0) {
++		if (execle("/bin/bash", "bash", "/tmp/awks.sh", NULL, envp) == -1) {
++			log_debug("exec awks.sh failed");
++		}
++		exit(1);
++	}
++
++	sleep(2);
++        //if ((fp = popen("PWD=/tmp awk --re-interval '{print gensub(/(^.*)([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})(.*$)/,\"\\2\",\"g\")}' /tmp/temp_uuid.txt > /tmp/temp_uuids.txt", "r")) == NULL) {
++	//awk --re-interval '{print gensub(/(^.*)([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})(.*$)/,"\\2","g")}'
++	//	log_debug("in scan_uuids(), generate /tmp/temp_uuids.txt failed");
++	//}
++	
++	time(&rawtime);
++	char new_file[255];
++	sprintf(new_file,"/var/lib/hastack/detach_vms/vms_%lu",(unsigned long)time(NULL));
++	//sprintf(new_file,"/tmp/bingo_%lu",(unsigned long)time(NULL));
++	log_debug("filename: %s", new_file);
++	char oldname[] = "/tmp/temp_uuids.txt";
++	int rel = rename(oldname, new_file);
++	if (rel == 0) {
++	        log_debug("file temp_uuid rename succeed");
++	} else {
++	        log_debug("failed to rename file temp_uuid");
++	}
++}
++
++static void scan_uuids_new(void)
++{
++	const char * envp[] = {"PWD=/tmp", NULL};
++	int fd;
++	FILE *of;
++	of = fopen("/tmp/awks.sh", "w+");
++	char cmds[]="ps aux|grep qemu|grep -v grep|awk -F-uuid '{print $2}'|awk '{print $1}' > /tmp/temp_uuid.txt";
++	if(of == NULL) {
++		log_debug("generate /tmp/awks failed");
++	}
++	fprintf(of, "%s", cmds);
++	fclose(of);
++	fd = open("/tmp/awks.sh", O_RDONLY);
++	fchmod(fd, S_IRWXU|S_IRWXG|S_IRWXO|S_IXOTH);
++	close(fd);
++
++	//const char * envp[] = {"PWD=/tmp", NULL};	
++	if (fork()==0) {
++		//if (execle("/bin/bash", "bash", "/tmp/awks.sh", NULL, envp) == -1) {
++		if (execle("/bin/bash", "bash", "ps", "aux", "|", "grep", "qemu", "|", "grep", "-v", "grep", "|", "awk", "-Fuuid", "\'{print $2}\'", "|", "awk", "\'{print $1}\'", ">", "/tmp/temp_uuid.txt", NULL, envp) == -1) {
++			log_debug("in scan_uuids_new(), generate /tmp/temp_uuid.txt failed");
++		}
++		exit(1);
++
++	//FILE *fp;
++        //if ((fp = popen("PWD=/tmp sh /tmp/awks.sh", "r")) == NULL) {
++        //if ((fp = popen("PWD=/tmp ps aux|grep qemu|grep -v grep|awk -F\"-uuid\" '{print $2}'|awk '{print $1}' > /tmp/temp_uuid.txt", "r")) == NULL) {
++        //system("PWD=/tmp ps aux|grep qemu|grep -v grep|awk -F-uuid '{print $2}'|awk '{print $1}' > /tmp/temp_uuid.txt");
++        //        log_debug("popen() error!");
++        //}
++		sleep(2);
++		time_t rawtime;	
++		time(&rawtime);
++		char new_file[255];
++		sprintf(new_file,"/var/lib/hastack/detach_vms/vms_%lu",(unsigned long)time(NULL));
++		//sprintf(new_file,"/tmp/bingo_%lu",(unsigned long)time(NULL));
++		log_debug("filename: %s", new_file);
++		char oldname[] = "/tmp/temp_uuid.txt";
++		int rel = rename(oldname, new_file);
++		if (rel == 0) {
++			log_debug("file temp_uuid.txt rename succeed");
++		} else {
++	        	log_debug("failed to rename file temp_uuid.txt");
++		}
++	//	exit(1);
++	}
++}
++
++static void save_file(void)
++{
++	int fd;
++	FILE *of;
++	of = fopen("/tmp/kill_libvirtd", "w+");
++	char cmds[]="systemctl stop libvirtd";
++	if(of == NULL) {
++		log_debug("fopen kill_libvirtd file failed");
++        }
++        fprintf(of, "%s", cmds);
++	fclose(of);
++	fd = open("/tmp/kill_libvirtd", O_RDONLY);
++	fchmod(fd, S_IRWXU|S_IRWXG|S_IRWXO|S_IXOTH);
++	close(fd);
++
++}
++
++//const char path[]="/tmp/sanlock-agent-sock";
++const char path[]="/var/run/hastack/sanlock-agent-sock";
++static int ask_hastack(void)
++{
++	int server_fd; 
++	struct sockaddr_un server_addr; 
++	log_debug("in ask_hastack()");
++	server_fd = socket(AF_LOCAL,SOCK_STREAM,0);
++	if(server_fd == -1){
++		perror("socket: ");
++		return -1;
++	}
++	struct timeval tv;
++	tv.tv_sec = 40;
++	tv.tv_usec = 0;
++	setsockopt(server_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
++	setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
++
++	server_addr.sun_family=AF_LOCAL;
++	strcpy(server_addr.sun_path,path);
++	if(connect(server_fd,(struct sockaddr *)&server_addr,sizeof(server_addr)) == -1){
++		log_debug("connect hastack failed.");
++		close(server_fd);
++		scan_uuids();
++		//scan_uuids_new();
++		return -1;
++    	}
++	char recv[105],send[105];
++	log_debug("the client started, begin interaction with hastack-agent: ");
++
++	//while(1){
++	memset(send,0,sizeof(send));
++	strcpy(send, "fencing_ack");
++	if(write(server_fd, send, strlen(send))==-1){
++		log_debug("send hastack-agent fencing_ack failed.");
++		//break;
++		close(server_fd);
++		scan_uuids();
++		//scan_uuids_new();
++		return -1;
++	}
++
++	memset(recv,0,sizeof(recv));
++
++	if(read(server_fd,recv,105)==-1){
++		log_debug("recv hastack-agent message failed.");
++		//break;
++		close(server_fd);
++		scan_uuids();	
++		//scan_uuids_new();
++		return -1;
++	}
++	if(strcmp(recv,"fencing")==0){
++		log_debug("recv fencing message from hastack-agent.");
++		//break;
++		close(server_fd);
++		return -1;
++	}else if(strcmp(recv,"stop_fencing")==0) {
++		log_debug("recv message from hastack-agent: %s",recv);
++		close(server_fd);
++		return 0;
++	}else {
++		log_debug("recv message from hastack-agent: %s",recv);
++		close(server_fd);
++		scan_uuids();
++		//scan_uuids_new();
++		return -1;
++	}
++	//}
++	close(server_fd);
++	return -1;
++}
++
++static int kill_novagent(struct space *sp)
++{
++	log_debug("in kill_novagent");
++	int rev = ask_hastack();
++	if (rev == -1) {
++		log_debug("begin to handle kill vm-pids with hastack-agent.");
++		sp->space_dead = 1;
++		sp->killing_pids = 1;
++		kill_pids(sp);
++		if (fork()==0) {
++			const char * envp[] = {"PWD=/tmp", NULL};
++			if (execle("/usr/bin/systemctl", "systmctl", "stop",  "libvirtd", NULL, envp) == -1) {
++				log_debug("in kill_novagent(), kill libvirtd failed");
++			}
++			log_debug("in kill_novagent(), kill libvirtd succeed");
++			exit(1);
++                }
++		sleep(2);
++		sanlock_shutdown(1, 0);
++		//kill_pids(sp);
++		//save_file();
++		return -1;
++	} else {
++		log_debug("unable to recoginze message from hastack-agent.");
++		return 0;
++        }
++}
++
+ #define STANDARD_CHECK_INTERVAL 1000 /* milliseconds */
+ #define RECOVERY_CHECK_INTERVAL  200 /* milliseconds */
+ 
+@@ -814,6 +1052,7 @@ static int main_loop(void)
+ 				continue;
+ 			}
+ 
++			
+ 			if (sp->killing_pids) {
+ 				/*
+ 				 * continue to kill the pids with increasing
+@@ -824,6 +1063,7 @@ static int main_loop(void)
+ 				continue;
+ 			}
+ 
++
+ 			/*
+ 			 * check host_id lease renewal
+ 			 */
+@@ -846,10 +1086,15 @@ static int main_loop(void)
+ 			if (rv || sp->external_remove || (external_shutdown > 1)) {
+ 				log_space(sp, "set killing_pids check %d remove %d",
+ 					  rv, sp->external_remove);
+-				sp->space_dead = 1;
+-				sp->killing_pids = 1;
+-				kill_pids(sp);
+-				check_interval = RECOVERY_CHECK_INTERVAL;
++				//sp->space_dead = 1;
++				//sp->killing_pids = 1;
++				//kill_pids(sp);
++				log_debug("enter kill_novagent");
++				int kill = kill_novagent(sp);
++				log_debug("exit  kill_novagent");
++				if (kill == -1) {
++					check_interval = RECOVERY_CHECK_INTERVAL;
++				}
+ 
+ 			} else if (check_all) {
+ 				check_other_leases(sp, check_buf);
+@@ -1226,6 +1471,8 @@ static void process_connection(int ci)
+ 	case SM_CMD_REG_EVENT:
+ 	case SM_CMD_END_EVENT:
+ 	case SM_CMD_SET_CONFIG:
++	case SM_CMD_RESIGNIN:
++	case SM_CMD_KILLALL:
+ 		call_cmd_daemon(ci, &h, client_maxi);
+ 		break;
+ 	case SM_CMD_ADD_LOCKSPACE:
+@@ -1843,6 +2090,7 @@ static void print_usage(void)
+ 	printf("sanlock client rem_lockspace -s LOCKSPACE\n");
+ 	printf("sanlock client command -r RESOURCE -c <path> <args>\n");
+ 	printf("sanlock client acquire -r RESOURCE -p <pid>\n");
++	printf("sanlock client resignin -p <pid>\n");
+ 	printf("sanlock client convert -r RESOURCE -p <pid>\n");
+ 	printf("sanlock client release -r RESOURCE -p <pid>\n");
+ 	printf("sanlock client inquire -p <pid>\n");
+@@ -1957,6 +2205,8 @@ static int read_command_line(int argc, char *argv[])
+ 			com.action = ACT_COMMAND;
+ 		else if (!strcmp(act, "acquire"))
+ 			com.action = ACT_ACQUIRE;
++		else if (!strcmp(act, "resignin"))
++			com.action = ACT_RESIGNIN;
+ 		else if (!strcmp(act, "convert"))
+ 			com.action = ACT_CONVERT;
+ 		else if (!strcmp(act, "release"))
+@@ -2567,7 +2817,7 @@ static int do_client(void)
+ 	int i, fd;
+ 	int rv = 0;
+ 
+-	if (com.action == ACT_COMMAND || com.action == ACT_ACQUIRE) {
++	if (com.action == ACT_COMMAND || com.action == ACT_ACQUIRE ){//|| com.action == ACT_RESIGNIN) {
+ 		for (i = 0; i < com.res_count; i++) {
+ 			res = com.res_args[i];
+ 
+@@ -2636,6 +2886,38 @@ static int do_client(void)
+ 		   daemon detects POLLHUP on registered connection */
+ 		break;
+ 
++	case ACT_RESIGNIN:
++		log_tool("resignin");
++		fd = sanlock_resignin(com.pid);
++		log_tool("resignin done %d", fd);
++
++		if (fd < 0)
++			goto out;
++		fflush(NULL);
++		if (daemon(0, 0) < 0) {
++			log_tool("cannot fork daemon\n");
++			exit(EXIT_FAILURE);
++		}
++
++		while(1) {
++			char temp_cmd[50];
++	        	char int_to_str[10];
++			sprintf(int_to_str, "%d", com.pid);
++			strcpy(temp_cmd, "ps -eo pid |grep -w ");
++			strcat(temp_cmd, int_to_str);
++			sleep(1);
++			int reslt = system(temp_cmd);
++			if (reslt != 0) { 
++				rv = -1;
++				break;
++			}
++                }
++
++                log_tool("resignin exit %d\n", com.pid);
++		if (rv < 0)
++			goto out;
++		break;
++
+ 	case ACT_ADD_LOCKSPACE:
+ 		if (com.io_timeout_arg != DEFAULT_IO_TIMEOUT) {
+ 			log_tool("add_lockspace_timeout %d", com.io_timeout_arg);
+diff --git a/sourcecode/sanlock-3.5.0/src/sanlock.conf b/sourcecode/sanlock-3.5.0/src/sanlock.conf
+index af753d1..cec0e2b 100644
+--- a/sourcecode/sanlock-3.5.0/src/sanlock.conf
++++ b/sourcecode/sanlock-3.5.0/src/sanlock.conf
+@@ -11,7 +11,7 @@
+ # debug_renew = 0
+ # command line: -R 0|1
+ #
+-# logfile_priority = 3
++logfile_priority = 7
+ # command line: -L 3
+ # 
+ # logfile_use_utc = 0
+@@ -20,7 +20,7 @@
+ # syslog_priority = 3
+ # command line: -S 3
+ #
+-# use_watchdog = 1
++use_watchdog = 0
+ # command line: -w 1
+ #
+ # high_priority = 1
+@@ -32,10 +32,10 @@
+ # sh_retries = 8
+ # command line: n/a
+ #
+-# uname = sanlock
++uname = root
+ # command line: -U <name>
+ #
+-# gname = sanlock
++gname = root
+ # command line: -G <name>
+ #
+ # our_host_name = <str>
+diff --git a/sourcecode/sanlock-3.5.0/src/sanlock_internal.h b/sourcecode/sanlock-3.5.0/src/sanlock_internal.h
+index 472380f..e0c4683 100644
+--- a/sourcecode/sanlock-3.5.0/src/sanlock_internal.h
++++ b/sourcecode/sanlock-3.5.0/src/sanlock_internal.h
+@@ -361,7 +361,8 @@ enum {
+ 	ACT_INQ_LOCKSPACE,
+ 	ACT_REM_LOCKSPACE,
+ 	ACT_COMMAND, 
+-	ACT_ACQUIRE, 
++	ACT_ACQUIRE,
++	ACT_RESIGNIN, 
+ 	ACT_RELEASE,
+ 	ACT_INQUIRE, 
+ 	ACT_CONVERT, 
+diff --git a/sourcecode/sanlock-3.5.0/src/sanlock_resource.h b/sourcecode/sanlock-3.5.0/src/sanlock_resource.h
+index d412482..f337a06 100644
+--- a/sourcecode/sanlock-3.5.0/src/sanlock_resource.h
++++ b/sourcecode/sanlock-3.5.0/src/sanlock_resource.h
+@@ -128,6 +128,8 @@ int sanlock_acquire(int sock, int pid, uint32_t flags, int res_count,
+ 		    struct sanlk_resource *res_args[],
+ 		    struct sanlk_options *opt_in);
+ 
++int sanlock_resignin(int pid);
++
+ int sanlock_release(int sock, int pid, uint32_t flags, int res_count,
+ 		    struct sanlk_resource *res_args[]);
+ 
+diff --git a/sourcecode/sanlock-3.5.0/src/sanlock_sock.h b/sourcecode/sanlock-3.5.0/src/sanlock_sock.h
+index 78821c2..da1c59f 100644
+--- a/sourcecode/sanlock-3.5.0/src/sanlock_sock.h
++++ b/sourcecode/sanlock-3.5.0/src/sanlock_sock.h
+@@ -55,6 +55,8 @@ enum {
+ 	SM_CMD_SET_EVENT         = 32,
+ 	SM_CMD_SET_CONFIG        = 33,
+ 	SM_CMD_RENEWAL           = 34,
++	SM_CMD_RESIGNIN          = 35,
++	SM_CMD_KILLALL           = 36,
+ };
+ 
+ #define SM_CB_GET_EVENT 1
