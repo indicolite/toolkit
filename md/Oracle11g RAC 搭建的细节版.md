@@ -421,6 +421,59 @@ http://www.oracle.com/technetwork/server-storage/linux/asmlib/rhel7-2773795.html
 依次检查几个节点里的三个文件，确保里面填写的 hostname 是一致的。修改完毕以后需要重启机器方可生效。 /etc/hosts，/etc/hostname，/etc/sysconfig/network
 ### 7. Failed to register Grid Infrastructure type ora.mdns.type
 https://blog.csdn.net/carry9148/article/details/52252755
+### 8. centos7 下的单节点自启动如何添加？
+首先按照相关路径修改 dbstart 的内容如下：
+```
+[root@oracle-img ~]# cat /opt/app/oracle/product/11.2.0/db_1/bin/dbstart
+...
+...
+#####ORACLE_HOME_LISTNER=$1##### comment out this line and add below one
+ORACLE_HOME_LISTNER=$ORACLE_HOME
+```
+接着按照相关的 binary 路径添加以下内容，即 /etc/rc.local 下的：lsnrctl 和 dbstart
+```
+[root@oracle-img ~]# cat /etc/rc.local
+#!/bin/bash
+# THIS FILE IS ADDED FOR COMPATIBILITY PURPOSES
+#
+# It is highly advisable to create own systemd services or udev rules
+# to run scripts during boot instead of using this file.
+#
+# In contrast to previous versions due to parallel execution during boot
+# this script will NOT be run after all other services.
+#
+# Please note that you must run 'chmod +x /etc/rc.d/rc.local' to ensure
+# that this script will be executed during boot.
+
+touch /var/lock/subsys/local
+su - oracle -lc "/opt/app/oracle/product/11.2.0/db_1/bin/lsnrctl start"
+su - oracle -lc "/opt/app/oracle/product/11.2.0/db_1/bin/dbstart"
+```
+再次修改 /etc/oratab 的内容，最后一个字母 **N** 改为 **Y**：
+```
+[root@oracle-img ~]# cat /etc/oratab
+# This file is used by ORACLE utilities.  It is created by root.sh
+# and updated by either Database Configuration Assistant while creating
+# a database or ASM Configuration Assistant while creating ASM instance.
+
+# A colon, ':', is used as the field terminator.  A new line terminates
+# the entry.  Lines beginning with a pound sign, '#', are comments.
+#
+# Entries are of the form:
+#   $ORACLE_SID:$ORACLE_HOME:<N|Y>:
+#
+# The first and second fields are the system identifier and home
+# directory of the database respectively.  The third filed indicates
+# to the dbstart utility that the database should , "Y", or should not,
+# "N", be brought up at system boot time.
+#
+# Multiple entries with the same $ORACLE_SID are not allowed.
+#
+#
+oracle:/opt/app/oracle/product/11.2.0/db_1:Y
+```
+最后运行，chmod +x /etc/rc.d/rc.local，重启机器，确认 **pmon** 进程存在，之后通过 sqlplus 登陆查看相关 instance 的状态即可。
+
 ## 链接
 http://www.oracle.com/technetwork/database/options/clustering/learnmore/index.html
 http://www.oracle.com/technetwork/cn/products/clustering/rac-wp-12c-1896129-zhs.pdf
