@@ -23,4 +23,4 @@ This code refers to some automation in centos7, plus with rpms for working.
 - **snippet/***
 This code refers to some linux socket snippets.
 - **mysql/orzdba**
-This code is kinds of python version of orzdba.pl.
+This code is kinds of orzdba.pl, python version from luobo.
