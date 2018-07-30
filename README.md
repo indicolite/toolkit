@@ -23,4 +23,6 @@ This code refers to some automation in centos7, plus with rpms for working.
 - **snippet/***
 This code refers to some linux socket snippets.
 - **mysql/orzdba**
-This code is kinds of orzdba.pl, python version from luobo.
+This code is .py version rewriting of orzdba.pl from luobo.
+- **mysql/galera.sh**
+This code is for galera cluster check or recovery.
