@@ -4,9 +4,6 @@
 This code handles a big single file and load the filtered data into database, whose performance boost from 700+s to 8+s.
 - **centos/shell/rockets.sh**
 This code from teddysun.com, which is used to deploy shadowsocks in one step.
-```
-    ./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log
-```
 - **selenium/shadow_qrcode.py**
 This code simulates selenium to crawl dynamic data, and then into database, also saves to QRcode, periodically.
 - **selenium/crawling_blog.py**
@@ -25,3 +22,5 @@ This code generates ansible example codes.
 This code refers to some automation in centos7, plus with rpms for working.
 - **snippet/***
 This code refers to some linux socket snippets.
+- **mysql/orzdba**
+This code is kinds of orzdba.pl, python version from luobo.
