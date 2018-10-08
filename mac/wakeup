@@ -1,0 +1,24 @@
+#!/bin/bash
+#.wakeup
+#chmod +x ~/.wakeup
+
+##brew install sleepwatcher
+##brew services start sleepwatcher
+##
+##⇒  ps aux|grep sleepwatcher
+##/usr/local/sbin/sleepwatcher -V -s ~/.sleep -w ~/.wakeup
+
+
+net=`system_profiler SPAirPortDataType | awk -F':' '/Current Network Information:/ { 
+    getline 
+    sub(/^ */, "") 
+    sub(/:$/, "") 
+    print 
+}'`
+
+# If located in designated Wifi
+if [ "$net"x = "Test4WIFI"x ];then
+    #open /path/to/some.app
+    echo "Finished!!!"
+    echo `date` >> ~/test.log
+fi
