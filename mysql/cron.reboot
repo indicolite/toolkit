@@ -1,2 +1,3 @@
 #/var/spool/cron/root
+#SET GLOBAL wsrep_provider_options="pc.bootstrap=1";
 @reboot sed -ie '/safe_to/c\safe_to_bootstarp: 1' /var/lib/mysql/grastate.dat && /usr/bin/galera_new_cluster
