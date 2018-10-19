@@ -8,6 +8,8 @@ This code from teddysun.com, which is used to deploy shadowsocks in one step.
 This code simulates selenium to crawl dynamic data, and then into database, also saves to QRcode, periodically.
 - **selenium/crawling_blog.py**
 This code simulates selenium to crawl blog data in xiami.group and save data into local postgresql database.
+- **selenium/crawl_byGoose3.py**
+This code uses [Goose3](https://github.com/goose3/goose3) to extract data, which saves most of xmls processing work.
 - **mysql/zabbix_.sql**
 This code aims to zabbix table-partition.
 - **centos/shell/tcpdump_mysql.sh**
