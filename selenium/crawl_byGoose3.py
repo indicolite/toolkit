@@ -22,8 +22,8 @@ from goose3.text import StopWordsChinese
 
 nothing = "http://www.yuedu88.com/xiyoubashiyian/29655.html"
 def get_newContent(nothing):
-    #g = Goose({'stopwords_class': StopWordsChinese})
-    g = Goose({'stopwords_class': StopWordsChinese, 'browser_user_agent': 'Version/5.1.2 Safari/534.52.7'})
+    g = Goose({'stopwords_class': StopWordsChinese})
+    #g = Goose({'stopwords_class': StopWordsChinese, 'browser_user_agent': 'Version/5.1.2 Safari/534.52.7'})
     article = g.extract(url=nothing)
 
     wb_data = requests.get(nothing,allow_redirects=False)
@@ -35,7 +35,11 @@ def get_newContent(nothing):
 
     file = open("./xiyoubashiyian_datangniliyu.txt", "ab+")
     file.write((article.title).encode('utf-8'))
+    file.write("\n".encode('utf-8'))
+    file.write("\n".encode('utf-8'))
     file.write((article.cleaned_text).encode('utf-8'))
+    file.write("\n".encode('utf-8'))
+    file.write("\n".encode('utf-8'))
     file.close()
 
     return nothing
