@@ -304,10 +304,17 @@ systemctl status mariadb.service
 wsrep_sst_method=rsync
 #wsrep_sst_method=xtrabackup-v2
 ```
+
+   另外，也可以在三节点集群的其中一台节点加上个一条crontab，内容如下。
+```
+#/var/spool/cron/root
+#SET GLOBAL wsrep_provider_options="pc.bootstrap=1";
+@reboot sed -ie '/safe_to/c\safe_to_bootstarp: 1' /var/lib/mysql/grastate.dat && /usr/bin/galera_new_cluster
+```
 ### 集群检测以及恢复的脚本工具？
    Linux环境下以命令行形式运行，直接添加集群中三个节点的名字即可。
 ```
-wget https://raw.githubusercontent.com/indicolite/tools/master/mysql/galera.sh
+wget https://raw.githubusercontent.com/indicolite/tools/master/mysql/galera/galera.sh
 ```
 ### 关于备份的说明？
    先解释**逻辑备份**和**物理备份**的区别：
