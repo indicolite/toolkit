@@ -1,0 +1,30 @@
+delimiter //
+create event my_long_running_query_monitor
+on schedule every 5 minute
+starts '2018-10-15 11:00:00'
+on completion preserve enable do
+begin
+  declare v_sql varchar(500);
+  declare no_more_long_running_query integer default 0;
+  declare c_tid cursor for
+    select concat ('kill ',id,';') from 
+    information_schema.processlist
+    where time >= 3600
+    and user = substring(current_user(),1,instr(current_user(),'@')-1)
+    and command not in ('sleep')
+    and state not like ('waiting for table%lock');
+  declare continue handler for not found
+    set no_more_long_running_query=1;
+ 
+  open c_tid;
+  repeat
+    fetch c_tid into v_sql;
+    set @v_sql=v_sql;
+    prepare stmt from @v_sql;
+    execute stmt;
+    deallocate prepare stmt;
+  until no_more_long_running_query end repeat;
+  close c_tid;
+end;
+//
+delimiter ;
