@@ -6,7 +6,7 @@
 ###############################################################
 
 BASEPATH="/home"
-SCRIPT="/usr/local/bin/xbackup.sh"
+SCRIPT="{{mariadb.backup.backup_path}}/xbackup.sh"
 BACKUPPATH="$BASEPATH/db-backup"
 BACKUPPATH_FULL="$BASEPATH/db-backup/FULL"
 BACKUPPATH_INCR="$BASEPATH/db-backup/INCR"
@@ -17,11 +17,18 @@ BACKUPPATH_TEMP_INCR="$BACKUPPATH_TEMP/INCR"
 BACKUPPATH_CEPH="/data/rbd_backup_db/"
 #BACKUP_SOURCE="jydatapool1"
 LOG_PATH="/var/log/xbackup.log"
-DBUSER="root"
-DBPASSWD="Abc12345"
+DBUSER="{{mariadb.default.user}}"
+DBCONF="/etc/my.cnf.d/mariadb-server.cnf"
+DBPORT="{{mariadb.default.port}}"
+DBSOCKET="/var/lib/mysql/mysql.sock"
+DBDATABASES=" aodh barbican ceilometer cinder fitos_portal_main fitos_portal_resource fitos_sso glance gnocchi heat information_schema keystone manila mysql neutron nova nova_api octavia "
+DBPASSWD="{{mariadb.default.password}}"
 DATE1=$(/bin/date +"%Y%m%d_%H")
 DATE2=$(/bin/date +"%Y%m%d_%H%M")
-BASECMDS="--user=$DBUSER --password=$DBPASSWD --parallel=4 --no-timestamp --ftwrl-wait-threshold=40 --ftwrl-wait-query-type=all --ftwrl-wait-timeout=180 --kill-long-queries-timeout=20 --kill-long-query-type=all"
+BASECMDS="--defaults-file=$DBCONF --user=$DBUSER --password=$DBPASSWD --port=$DBPORT --socket=$DBSOCKET --parallel=4 --no-timestamp --databases="
+#Truncate table keystone.token
+MYSQL="/usr/bin/mysql"
+$MYSQL --user=$DBUSER --password=$DBPASSWD --port=$DBPORT  --socket=$DBSOCKET -e "truncate table keystone.token;"
 
 ## README ##
 README()
@@ -70,7 +77,7 @@ FULLBACKUP()
 {
 	LOG_TIME; echo " ## [INFO] Full Backup running, Please wait... ## " >> $LOG_PATH
         touch $BACKUPPATH_FULL/lock
-	LOG_TIME; innobackupex $BASECMDS $BACKUPPATH_FULL/$DATE1 >> $LOG_PATH 2>&1; IF_SUCCESS
+	LOG_TIME; innobackupex $BASECMDS"\"${DBDATABASES}\"" $BACKUPPATH_FULL/$DATE1 >> $LOG_PATH 2>&1; IF_SUCCESS
         rm -f $BACKUPPATH_FULL/lock
 }
 
@@ -95,11 +102,11 @@ INCREMENTAL()
 		LASTPATH_FULL=`ls -ct $BACKUPPATH_FULL | head -n 1`
 		INCRCMDS1="--incremental $BACKUPPATH_INCR/$DATE2 --incremental-basedir=$BACKUPPATH_FULL/$LASTPATH_FULL"
 		LOG_TIME; echo " ## [INFO] Incremental 'First' Backup running, Please wait... ## " >> $LOG_PATH 2>&1
-		LOG_TIME; innobackupex $BASECMDS $INCRCMDS1 >> $LOG_PATH 2>&1
+		LOG_TIME; innobackupex $BASECMDS"\"${DBDATABASES}\"" $INCRCMDS1 >> $LOG_PATH 2>&1
 		IF_SUCCESS
 	else
 		LOG_TIME; echo " ## [INFO] Incremental Backup running, Please wait... ## " >> $LOG_PATH
-		LOG_TIME; innobackupex $BASECMDS $INCRCMDS2 >> $LOG_PATH 2>&1
+		LOG_TIME; innobackupex $BASECMDS"\"${DBDATABASES}\"" $INCRCMDS2 >> $LOG_PATH 2>&1
 		IF_SUCCESS
 	fi
 }
