@@ -243,3 +243,7 @@ rabbitmqctl -n hare forget_cluster_node hare@rabbit1
 # 参考链接
 
 [RabbitMQ运维][https://blog.csdn.net/liuxinghao/article/details/52076436]
+
+[RabbitMQ指南][https://dbaplus.cn/news-141-1464-1.html]
+
+[https://messeiry.com/openstack-rabbitmq-deep-dive/][https://messeiry.com/openstack-rabbitmq-deep-dive/]
