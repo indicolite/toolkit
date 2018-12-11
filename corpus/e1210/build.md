@@ -1,7 +1,8 @@
 [TOC]
+
 ## pgloader
-```
-indicolite@:~/homework/e1210|⇒  pgloader mysql://root:xxxxx@192.168.2.208/movie pgsql:///movie_neo4j
+``` bash
+indicolite@:~|⇒  pgloader mysql://root:xxxxx@192.168.2.208/movie pgsql:///movie_neo4j
 2018-12-11T07:43:50.078000Z LOG Data errors in '/private/tmp/pgloader/'
 2018-12-11T07:43:50.081000Z LOG Migrating from #<MYSQL-CONNECTION mysql://root@192.168.2.208:3306/movie {10056F97B3}>
 2018-12-11T07:43:50.081000Z LOG Migrating into #<PGSQL-CONNECTION pgsql://indicolite@UNIX:5432/movie_neo4j {100583CE93}>
@@ -36,6 +37,37 @@ COPY Threads Completion          0          4                     0.264s
       Total import time          ✓      27394     1.6 MB          0.591s
 ```
 
+## docker起neo4j
+## neo4j导入csv文件
+```
+//导入节点 电影类型 注意类型转换
+LOAD CSV WITH HEADERS  FROM 'file:///genre.csv' AS line 
+MERGE (p:Genre{gid:toInteger(line.gid),name:line.gname})
+
+//导入节点 演员信息
+LOAD CSV WITH HEADERS FROM 'file:///person.csv' AS line 
+MERGE (p:Person { pid:toInteger(line.pid),birth:line.birth,death:line.death,name:line.name,biography:line.biography,birthplace:line.birthplace })
+
+//导入节点 电影信息
+LOAD CSV WITH HEADERS  FROM 'file:///movie.csv' AS line 
+MERGE (p:Movie{mid:toInteger(line.mid),title:line.title,introduction:line.introduction,rating:toFloat(line.rating),releasedate:line.releasedate})
+
+//导入关系 actedin 电影是谁参演的 1对多
+LOAD CSV WITH HEADERS FROM 'file:///person_to_movie.csv' AS line 
+match (from:Person{pid:toInteger(line.pid)}),(to:Movie{mid:toInteger(line.mid)}) 
+merge (from)-[r:actedin{pid:toInteger(line.pid),mid:toInteger(line.mid)}]->(to)
+
+//导入关系 电影是什么类型 1对多
+LOAD CSV WITH HEADERS FROM 'file:///movie_to_genre.csv' AS line 
+match (from:Movie{mid:toInteger(line.mid)}),(to:Genre{gid:toInteger(line.gid)}) 
+merge (from)-[r:is{mid:toInteger(line.mid),gid:toInteger(line.gid)}]->(to)
+
+//问：章子怡都演了哪些电影？
+match(n:Person)-[:actedin]->(m:Movie) where n.name='章子怡' return m.title
+
+//删除所有的节点及关系
+MATCH (n)-[r]-(b)
+DELETE n,r,b
+```
 ## 参考链接
 [基于电影知识图谱的智能问答系统][https://blog.csdn.net/appleyk/article/category/7667380]
-[from-mysql-to-postgresql][https://tapoueh.org/blog/2017/07/from-mysql-to-postgresql/]
