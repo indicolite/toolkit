@@ -38,3 +38,4 @@ COPY Threads Completion          0          4                     0.264s
 
 ## 参考链接
 [基于电影知识图谱的智能问答系统][https://blog.csdn.net/appleyk/article/category/7667380]
+[from-mysql-to-postgresql][https://tapoueh.org/blog/2017/07/from-mysql-to-postgresql/]
