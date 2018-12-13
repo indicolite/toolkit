@@ -23,7 +23,7 @@ This code generates ansible example codes.
 - **centos/***
 This code refers to some automation in centos7, plus with rpms for working.
 - **corpus/***
-This code refers to some linux socket snippets.
+This code refers to some code snippets.
 - **mysql/orzdba**
 This code is .py version rewriting of orzdba.pl from luobo.
 - **mysql/galera.sh**
