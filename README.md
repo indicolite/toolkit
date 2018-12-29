@@ -1,7 +1,7 @@
 # toolkit
 
 - **loading/*.py**
-This code handles a big single file and load the filtered data into database, whose performance boost from 700+s to 8+s.
+This code handles huge single file and load filtering data into database.
 - **centos/shell/rockets.sh**
 This code from teddysun.com, which is used to deploy shadowsocks in one step.
 - **selenium/shadow_qrcode.py**

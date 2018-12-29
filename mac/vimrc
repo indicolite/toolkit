@@ -1,5 +1,7 @@
 execute pathogen#infect()
 syntax enable              
+"set textwidth=80
+"set colorcolumn=+1
 filetype plugin indent on  
 set number                 
 let g:go_disable_autoinstall=0
@@ -12,6 +14,8 @@ if !executable('gotags') && !exists("g:go_gotags_bin")
 endif
 
 "let tagbar_left=1
+let g:tagbar_width=26
+let g:tagbar_autofocus=1
 let g:tagbar_type_go = {
     \ 'ctagstype' : 'go',
     \ 'kinds'     : [
@@ -132,11 +136,13 @@ set softtabstop=4
 ":nmap <silent> <Leader>i <Plug>IndentGuidesToggle
 
 nmap <Leader>fl :NERDTreeToggle<CR>
-let NERDTreeWinSize=32
-let NERDTreeWinPos="right"
+let NERDTreeWinSize=26
+let NERDTreeWinPos="left"
 let NERDTreeShowHidden=1
 let NERDTreeMinimalUI=1
 let NERDTreeAutoDeleteBuffer=1
+let NERDTreeIgnore=['\~$', '\.pyc$', '\.swp$']
+
 
 let g:NERDTreeIndicatorMapCustom = {
     \ "Modified"  : "✹",
@@ -186,3 +192,8 @@ let g:ycm_filetype_whitelist = {
 			\ }
 
 map <C-A> ggVG
+set pastetoggle=
+autocmd BufReadPost *
+  \ if line("'\"") > 1 && line("'\"") <= line("$") |
+  \   exe "normal! g`\"" |
+  \ endif
